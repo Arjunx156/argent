@@ -125,3 +125,26 @@ def test_block_is_idempotent() -> None:
 def test_unclosed_block_is_refused() -> None:
     with pytest.raises(SkipTargetError, match="never closed"):
         managed_block(b"# >>> edith >>>\r\nhalf a block\r\n", BODY)
+
+
+def test_terminal_handles_light_and_dark_scheme_pairs() -> None:
+    settings = terminal(True)
+    first = settings["profiles"]["list"][0]  # pyright: ignore[reportIndexIssue]
+    first["colorScheme"] = {"dark": "Tadashi Neon", "light": "Mine"}
+    merged = json.loads(terminal_settings(as_bytes(settings, 4), THEME))
+    assert merged["profiles"]["list"][0]["colorScheme"] == {"dark": "Edith", "light": "Mine"}
+
+
+def test_a_profile_that_isnt_utf8_is_skipped() -> None:
+    with pytest.raises(SkipTargetError, match="UTF-8"):
+        managed_block("# café\r\n".encode("utf-16"), BODY)
+
+
+def test_odd_claude_settings_shapes_are_skipped() -> None:
+    with pytest.raises(SkipTargetError, match="hooks"):
+        claude_settings(b'{"hooks": []}', STATUSLINE, chimes=True)
+
+
+def test_block_keeps_form_feeds_inside_lines() -> None:
+    merged = managed_block(b"$a = 'x\x0cy'\r\n", BODY)
+    assert merged.startswith(b"$a = 'x\x0cy'\r\n")

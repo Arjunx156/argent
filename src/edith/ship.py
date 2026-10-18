@@ -77,33 +77,34 @@ def ship(
         raise ShipError("the commit message won't do: " + "; ".join(problems))
     out.tag("pass", f"message  {out.dim(message.strip().splitlines()[0])}")
 
-    staged_before = _staged(repo)
-    we_staged = not staged_before
+    we_staged = not _staged(repo)
     if we_staged:
-        git(repo, "add", "-A")
+        added = git(repo, "add", "-A")
+        if added.returncode != 0:
+            raise ShipError(f"git add failed: {_tail(added.stderr)}")
     staged = _staged(repo)
     unpushed = _unpushed(repo)
     if not staged and not unpushed:
         out.tag("ok", "nothing to commit or push")
         return
 
+    committed = False
     try:
         if staged:
             _gate(out, "secrets", scan(repo, ["--pre-commit", "--staged"]), f"{len(staged)} files")
             outcome = check(repo)
             if outcome is not None:
                 _gate(out, "checks", outcome, "just check")
-    except ShipError:
-        if we_staged:
+            done = git(repo, "commit", "-q", "-F", "-", stdin=message.strip() + "\n")
+            if done.returncode != 0:
+                raise ShipError(f"git commit failed: {_tail(done.stderr or done.stdout)}")
+            committed = True
+            head = git(repo, "log", "-1", "--format=%h %s").stdout.strip()
+            out.tag("set", f"commit   {head}")
+    finally:
+        # whatever stopped us (a gate, a hook, ctrl-c), don't leave the user's tree staged
+        if we_staged and staged and not committed:
             git(repo, "reset", "-q")
-        raise
-
-    if staged:
-        done = git(repo, "commit", "-q", "-F", "-", stdin=message.strip() + "\n")
-        if done.returncode != 0:
-            raise ShipError(f"git commit failed: {_tail(done.stderr or done.stdout)}")
-        head = git(repo, "log", "-1", "--format=%h %s").stdout.strip()
-        out.tag("set", f"commit   {head}")
 
     if push:
         _push(repo, out, scan)

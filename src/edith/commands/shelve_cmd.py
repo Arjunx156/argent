@@ -29,10 +29,12 @@ def resolve(env: Env, raw: str) -> tuple[Path, Path, str]:
     rel = Path(raw.replace("\\", "/").removeprefix("~/.claude/").strip("/"))
     if not rel.parts or rel.is_absolute() or ".." in rel.parts:
         raise ShelfError(f"{raw}: give a path inside ~/.claude, like rules/ecc")
-    if rel.parts[0] in PROTECTED or rel.parts[0] == INDEX:
+    # windows paths ignore case, so the guards must too
+    top = rel.parts[0].casefold()
+    if top in {p.casefold() for p in PROTECTED} or top == INDEX:
         raise ShelfError(f"{raw}: edith or Claude Code owns that; it can't be shelved")
-    ours = env.kit / "claude" / "skills"
-    if rel.parts[0] == "skills" and len(rel.parts) > 1 and (ours / rel.parts[1]).is_dir():
+    ours = {p.name.casefold() for p in (env.kit / "claude" / "skills").iterdir() if p.is_dir()}
+    if top == "skills" and len(rel.parts) > 1 and rel.parts[1].casefold() in ours:
         raise ShelfError(f"{raw}: that skill comes from the kit; remove it there instead")
     return env.claude / rel, env.shelf / rel, rel.as_posix()
 

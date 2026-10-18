@@ -96,6 +96,17 @@ def test_failing_checks_stop_the_commit(repo: Path) -> None:
     assert git(repo, "log", "-1", "--format=%s") == "first"
 
 
+def test_any_failure_unstages_what_ship_staged(repo: Path) -> None:
+    (repo / "b.txt").write_text("b", encoding="utf-8")
+
+    def explodes(_repo: Path) -> Outcome:
+        raise OSError("just vanished")
+
+    with pytest.raises(OSError):
+        run(repo, "add b", check=explodes)
+    assert git(repo, "diff", "--cached", "--name-only") == ""
+
+
 def test_earlier_unpushed_commits_get_pushed_too(repo: Path) -> None:
     (repo / "b.txt").write_text("b", encoding="utf-8")
     git(repo, "add", "-A")

@@ -107,19 +107,55 @@ def test_files_dropped_from_the_kit_are_removed_if_untouched(env: Env, clock: Cl
     assert not State.load(env).owns(gone)
 
 
-def test_mirrored_folders_lose_strays_but_keep_caches(env: Env, clock: Clock) -> None:
+def test_mirror_strays_are_kept_until_forced_and_caches_always(env: Env, clock: Clock) -> None:
     skill = env.home / ".claude" / "skills" / "vibe"
     (skill / "__pycache__").mkdir(parents=True)
     (skill / "__pycache__" / "x.pyc").write_bytes(b"")
-    (skill / "old.md").write_bytes(b"stale")
+    (skill / "my-notes.md").write_bytes(b"mine")
 
     state = State.load(env)
     actions = plan([target(skill / "SKILL.md", b"vibe")], state, mirror=[skill])
     apply(actions, env, state, clock=clock)
+    assert kinds(actions) == {"SKILL.md": "new", "my-notes.md": "stray"}
+    assert (skill / "my-notes.md").exists()
 
-    assert kinds(actions) == {"SKILL.md": "new", "old.md": "remove"}
-    assert not (skill / "old.md").exists()
+    state = State.load(env)
+    actions = plan([target(skill / "SKILL.md", b"vibe")], state, mirror=[skill])
+    apply(actions, env, state, clock=clock, force=True)
+    assert not (skill / "my-notes.md").exists()
     assert (skill / "__pycache__" / "x.pyc").exists()
+
+
+def test_files_already_in_place_become_owned(env: Env, clock: Clock) -> None:
+    dest = env.home / "a.txt"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_bytes(b"same")
+    deploy(env, [target(dest, b"same")], clock)
+    assert State.load(env).owns(dest)
+
+    dest.write_bytes(b"hand edit")
+    actions = deploy(env, [target(dest, b"kit v2")], clock)
+    assert kinds(actions) == {"a.txt": "drift"}
+    assert dest.read_bytes() == b"hand edit"
+
+
+def test_a_failing_write_still_saves_what_was_written(
+    env: Env, clock: Clock, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    first, second = env.home / "first.txt", env.home / "second.txt"
+    import edith.deploy
+
+    real = edith.deploy.write_atomic
+
+    def flaky(dest: Path, content: bytes) -> None:
+        if dest == second:
+            raise PermissionError("locked")
+        real(dest, content)
+
+    monkeypatch.setattr(edith.deploy, "write_atomic", flaky)
+    with pytest.raises(PermissionError):
+        deploy(env, [target(first, b"1"), target(second, b"2")], clock)
+    assert State.load(env).owns(first)
 
 
 def test_dry_run_touches_nothing(env: Env, clock: Clock) -> None:
@@ -162,6 +198,18 @@ def test_restore_puts_back_what_was_there_and_deletes_what_wasnt(env: Env, clock
     assert not fresh.exists()
     assert not State.load(env).owns(old)
     # restoring is itself undoable
+    assert list_snapshots(env)[-1].reason == f"restore {name}"
+
+
+def test_restore_journals_before_it_touches_anything(env: Env, clock: Clock) -> None:
+    dest = env.home / "a.txt"
+    deploy(env, [target(dest, b"edith")], clock)
+    name = list_snapshots(env)[-1].name
+    dest.unlink()
+    dest.mkdir()  # a folder where the snapshot expects to delete a file
+
+    with pytest.raises(OSError):
+        restore(env, name, clock=clock)
     assert list_snapshots(env)[-1].reason == f"restore {name}"
 
 

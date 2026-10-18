@@ -158,6 +158,10 @@ def check_kit(ctx: Context) -> list[Finding]:
         detail = f"{action.label} was edited by hand since edith wrote it"
         fix = "keep it: copy the change into the kit; drop it: edith deploy --force"
         findings.append(Finding("warn", "kit drift", detail, fix))
+    for action in (a for a in actions if a.kind == "stray"):
+        detail = f"{pretty(ctx.env, action.dest)} sits in a kit folder but isn't in the kit"
+        fix = "keep it: add it to the kit; drop it: edith deploy --force"
+        findings.append(Finding("warn", "kit drift", detail, fix))
     for action in skipped:
         findings.append(Finding("warn", "kit", f"{action.label}: {action.reason}"))
     if pending:

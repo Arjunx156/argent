@@ -37,6 +37,10 @@ def dump_json(
 
 def claude_settings(current: bytes | None, statusline: str, chimes: bool) -> bytes:
     before = load_json(current, "Claude settings.json")
+    _expect(before, "env", dict, "Claude settings.json")
+    _expect(before, "hooks", dict, "Claude settings.json")
+    for event in CHIMES:
+        _expect(before.get("hooks", {}), event, list, f"Claude settings.json hooks.{event}")
     after = copy.deepcopy(before)
     # quoted: the home folder has a space, and an unquoted path splits at it
     after["statusLine"] = {"type": "command", "command": f'python -I "{statusline}"', "padding": 0}
@@ -74,8 +78,14 @@ def terminal_settings(current: bytes | None, theme: dict[str, Any]) -> bytes:
     profiles.setdefault("defaults", {}).update(theme["defaults"])
     # a profile still pointing at a retired scheme would make the terminal complain
     for profile in profiles.get("list", []):
-        if profile.get("colorScheme") in retired:
+        chosen = profile.get("colorScheme")
+        if isinstance(chosen, str) and chosen in retired:
             profile["colorScheme"] = scheme["name"]
+        elif isinstance(chosen, dict):  # a {"dark": ..., "light": ...} pair
+            pair: dict[str, Any] = chosen
+            profile["colorScheme"] = {
+                mode: scheme["name"] if name in retired else name for mode, name in pair.items()
+            }
 
     source = theme.get("defaultProfileSource")
     pwsh = [p for p in profiles.get("list", []) if p.get("source") == source and "guid" in p]
@@ -96,13 +106,21 @@ def managed_block(
     """Own one marked block in a shared file; retire blocks from tools edith replaces."""
     raw = current or b""
     bom = raw.startswith(b"\xef\xbb\xbf")
-    text = raw.decode("utf-8-sig")
+    try:
+        text = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        raise SkipTargetError("isn't UTF-8 (PowerShell 5.1 may have saved it as UTF-16)") from None
     newline = "\n" if raw and b"\r\n" not in raw else "\r\n"
+
+    # newlines only: splitlines would also break lines at form feeds and the like
+    lines = text.replace("\r\n", "\n").split("\n")
+    if lines[-1] == "":
+        lines.pop()
 
     kept: list[str] = []
     insert_at: int | None = None
     inside: str | None = None
-    for line in text.splitlines():
+    for line in lines:
         marker = line.strip()
         if inside:
             if marker == f"# <<< {inside} <<<":
@@ -128,3 +146,9 @@ def managed_block(
 
     result = (newline.join(kept) + newline).encode("utf-8")
     return (b"\xef\xbb\xbf" if bom else b"") + result
+
+
+def _expect(table: dict[str, Any], key: str, kind: type, label: str) -> None:
+    """Odd shapes get skipped with a reason instead of crashing the whole deploy."""
+    if key in table and not isinstance(table[key], kind):
+        raise SkipTargetError(f"{label}: {key} should be a {kind.__name__}; merge it by hand")

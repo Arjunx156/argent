@@ -80,11 +80,15 @@ def restore(env: Env, name: str, clock: Clock) -> list[Path]:
     entries = json.loads(journal.read_text(encoding="utf-8"))["files"]
 
     undo = Snapshot.create(env, f"restore {name}", clock)
+    for entry in entries:
+        undo.keep(Path(entry["dest"]))
+    # journal first, like deploy, so a restore that fails halfway can itself be undone
+    undo.save()
+
     state = State.load(env)
     touched: list[Path] = []
     for entry in entries:
         dest = Path(entry["dest"])
-        undo.keep(dest)
         if entry["existed"]:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(env.snapshots / name / entry["stored"], dest)
@@ -92,6 +96,5 @@ def restore(env: Env, name: str, clock: Clock) -> list[Path]:
             dest.unlink()
         state.forget(dest)
         touched.append(dest)
-    undo.save()
     state.save()
     return touched

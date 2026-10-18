@@ -59,7 +59,7 @@ kit/tools.toml     the tool manifest: source, group, and the line Claude may rea
 kit/claude/        standing orders template, status line, skills
 kit/config/        terminal scheme, prompt, PowerShell block, editor settings
 src/edith/         the CLI: stdlib only at runtime, Python 3.12+
-tests/             110 tests, every one against a fake machine in a temp folder
+tests/             pytest, every test against a fake machine in a temp folder
 ```
 
 A deploy builds one target per file. Whole files belong to edith. Shared files, like `settings.json` for Claude, Windows Terminal and VS Code, or the PowerShell profile, get merged: edith touches only its own keys or its own marked block. The plan compares each target with the disk and with the hash edith recorded last time, so it can tell new, update, adopt and drift apart before anything is written.

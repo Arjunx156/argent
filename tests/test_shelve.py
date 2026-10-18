@@ -52,6 +52,9 @@ def test_listing_shows_what_is_parked(claude: Env) -> None:
     ("path", "message"),
     [
         ("CLAUDE.md", "owns that"),
+        ("claude.md", "owns that"),
+        ("Settings.JSON", "owns that"),
+        ("Skills/Vibe", "comes from the kit"),
         ("settings.json", "owns that"),
         ("skills/vibe", "comes from the kit"),
         ("../.ssh", "inside ~/.claude"),

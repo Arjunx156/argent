@@ -21,6 +21,7 @@ TAG_COLOURS = {
     "adopt": GOLD,
     "remove": GOLD,
     "drift": GOLD,
+    "stray": GOLD,
     "warn": GOLD,
     "skip": DIM,
     "info": DIM,

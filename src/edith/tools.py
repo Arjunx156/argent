@@ -129,6 +129,8 @@ def _tool(raw: dict[str, Any], groups: dict[str, str], areas: set[str]) -> Tool:
         raise ManifestError(f"{cmd}: needs exactly one of winget, uv or release")
 
     release = raw.get("release")
+    if release and not str(release.get("asset", "")).endswith(".zip"):
+        raise ManifestError(f"{cmd}: release assets must be .zip archives")
     return Tool(
         cmd=cmd,
         group=raw["group"],

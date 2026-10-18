@@ -16,7 +16,7 @@ from edith.state import State
 from edith.tools import Detection, detect, load_manifest
 from edith.ui import DIM, MINT, RED, Out
 
-ORDER = {"skip": 0, "drift": 1, "remove": 2, "adopt": 3, "update": 4, "new": 5}
+ORDER = {"skip": 0, "drift": 1, "stray": 1, "remove": 2, "adopt": 3, "update": 4, "new": 5}
 
 
 def register(sub: Any) -> None:
@@ -81,7 +81,7 @@ def run_deploy(args: argparse.Namespace, env: Env, out: Out) -> int:
         out.line(f"snapshot {snapshot.name}  {out.dim(f'undo: edith restore {snapshot.name}')}")
     else:
         out.line(out.dim("everything already in place"))
-    drifted = [a for a in actions if a.kind == "drift"]
+    drifted = [a for a in actions if a.kind in ("drift", "stray")]
     if drifted and not args.force:
         out.tag("warn", f"{len(drifted)} edited by hand and left alone")
         out.line(out.dim("`edith diff` shows them; `edith deploy --force` overwrites them."))

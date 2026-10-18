@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from edith.paths import Env
+from edith.state import write_atomic
 from edith.tools import Release, Tool
 
 ALREADY_INSTALLED = -1978335189  # winget's 0x8A15002B: nothing newer to install
@@ -86,7 +87,10 @@ def install_release(release: Release, bin_dir: Path, fetch: Fetch) -> Path:
     exe = verified_exe(payload, asset.get("digest"), release.exe)
     bin_dir.mkdir(parents=True, exist_ok=True)
     dest = bin_dir / release.exe
-    dest.write_bytes(exe)
+    try:
+        write_atomic(dest, exe)
+    except PermissionError:
+        raise InstallError(f"{dest.name} is in use; close it and run install again") from None
     return dest
 
 

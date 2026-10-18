@@ -67,8 +67,8 @@ def plan(targets: Iterable[Target], state: State, mirror: Iterable[Path] = ()) -
     for folder in mirror:
         for stray in _files_under(folder):
             if key(stray) not in wanted and not state.owns(stray):
-                content = read(stray)
-                actions.append(Action("remove", stray, stray.name, content, None, True))
+                reason = "in a kit folder but not in the kit; --force removes it"
+                actions.append(Action("stray", stray, stray.name, read(stray), None, True, reason))
     return actions
 
 
@@ -130,10 +130,12 @@ def apply(
     reason: str = "deploy",
 ) -> Path | None:
     """Carry out a plan. Returns the snapshot folder, or None when nothing was written."""
-    forced = [a for a in actions if force and a.kind == "drift" and a.desired is not None]
+    forced = [a for a in actions if force and _forceable(a)]
     todo = [a for a in actions if a.writes] + forced
     forgotten = [a for a in actions if a.kind == "forget"]
-    if dry_run or not (todo or forgotten):
+    # files that already match the kit are owned from now on, so later hand edits count as drift
+    unowned = [a for a in actions if a.kind == "ok" and a.whole and not state.owns(a.dest)]
+    if dry_run or not (todo or forgotten or unowned):
         return None
 
     snapshot = None
@@ -143,15 +145,26 @@ def apply(
             snapshot.keep(action.dest)
         snapshot.save()
 
-    for action in todo:
-        if action.desired is None:
-            action.dest.unlink(missing_ok=True)
+    try:
+        for action in todo:
+            if action.desired is None:
+                action.dest.unlink(missing_ok=True)
+                state.forget(action.dest)
+                continue
+            write_atomic(action.dest, action.desired)
+            if action.whole:
+                state.record(action.dest, action.desired)
+        for action in forgotten:
             state.forget(action.dest)
-            continue
-        write_atomic(action.dest, action.desired)
-        if action.whole:
-            state.record(action.dest, action.desired)
-    for action in forgotten:
-        state.forget(action.dest)
-    state.save()
+        for action in unowned:
+            state.record(action.dest, action.current or b"")
+    finally:
+        # a failed write mid-run must not orphan the hashes of the writes before it
+        state.save()
     return snapshot.path if snapshot else None
+
+
+def _forceable(action: Action) -> bool:
+    if action.kind == "stray":
+        return True
+    return action.kind == "drift" and action.desired is not None
