@@ -14,6 +14,10 @@ Clock = Callable[[], datetime]
 JOURNAL = "journal.json"
 
 
+class UnknownSnapshotError(LookupError):
+    pass
+
+
 @dataclass(frozen=True)
 class SnapshotInfo:
     name: str
@@ -72,7 +76,7 @@ def restore(env: Env, name: str, clock: Clock) -> list[Path]:
     """Put every journaled file back as it was, and delete the ones that didn't exist."""
     journal = env.snapshots / name / JOURNAL
     if not journal.is_file():
-        raise FileNotFoundError(f"no snapshot named {name!r}; `edith restore` lists them")
+        raise UnknownSnapshotError(f"no snapshot named {name!r}; `edith restore` lists them")
     entries = json.loads(journal.read_text(encoding="utf-8"))["files"]
 
     undo = Snapshot.create(env, f"restore {name}", clock)

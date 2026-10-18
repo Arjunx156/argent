@@ -1,7 +1,6 @@
 """The tool manifest, and what of it this machine actually has."""
 
 import os
-import shutil
 import sys
 import tomllib
 from collections.abc import Callable, Iterable
@@ -180,8 +179,33 @@ def _registry_path() -> list[str]:
     return found
 
 
-def _shutil_which(cmd: str, path: str) -> str | None:
-    return shutil.which(cmd, path=path)
+class PathIndex:
+    """Every file on PATH, listed once. shutil.which stats each folder for every suffix of
+    every tool, thousands of calls for the manifest; this is one scandir per folder."""
+
+    def __init__(self, path: str) -> None:
+        self.names: dict[str, str] = {}
+        for folder in path.split(os.pathsep):
+            try:
+                entries = list(os.scandir(folder))
+            except OSError:
+                continue
+            for entry in entries:
+                self.names.setdefault(_fold(entry.name), entry.path)
+
+    def find(self, cmd: str, _path: str = "") -> str | None:
+        if sys.platform != "win32":
+            hit = self.names.get(cmd)
+            return hit if hit and os.access(hit, os.X_OK) else None
+        suffixes = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").lower().split(";")
+        candidates = ("", *suffixes) if Path(cmd).suffix else suffixes
+        return next(
+            (self.names[k] for s in candidates if (k := _fold(cmd + s)) in self.names), None
+        )
+
+
+def _fold(name: str) -> str:
+    return name.lower() if sys.platform == "win32" else name
 
 
 def probe_path(raw: str, env: Env) -> Path:
@@ -196,8 +220,10 @@ def probe_path(raw: str, env: Env) -> Path:
     )
 
 
-def detect(tools: Iterable[Tool], env: Env, which: Which = _shutil_which) -> Detection:
+def detect(tools: Iterable[Tool], env: Env, which: Which | None = None) -> Detection:
     path = search_path(env)
+    if which is None:
+        which = PathIndex(path).find
     found: dict[str, str] = {}
     for tool in tools:
         hit = which(tool.cmd, path)

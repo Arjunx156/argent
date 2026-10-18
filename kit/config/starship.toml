@@ -1,0 +1,59 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+# one quiet line of context, then the cursor. cyan is where you are, gold is what needs you
+add_newline = true
+command_timeout = 500
+format = "$directory$git_branch$git_state$git_status$python$nodejs$bun$cmd_duration$line_break$character"
+palette = "edith"
+
+[palettes.edith]
+arc = "#3dd6f5"
+gold = "#f7c548"
+red = "#ff4d5e"
+text = "#d5dee8"
+dim = "#6a758a"
+
+[directory]
+style = "bold arc"
+truncation_length = 3
+truncate_to_repo = true
+read_only = " ro"
+read_only_style = "gold"
+format = "[$path]($style)[$read_only]($read_only_style) "
+
+[git_branch]
+symbol = " "
+style = "text"
+format = "[$symbol$branch]($style) "
+
+[git_state]
+style = "gold"
+format = "[$state( $progress_current/$progress_total)]($style) "
+
+[git_status]
+style = "gold"
+format = "([$all_status$ahead_behind]($style) )"
+
+[python]
+symbol = "py "
+style = "dim"
+format = "[$symbol$version( $virtualenv)]($style) "
+
+[nodejs]
+symbol = "node "
+style = "dim"
+format = "[$symbol$version]($style) "
+
+[bun]
+symbol = "bun "
+style = "dim"
+format = "[$symbol$version]($style) "
+
+[cmd_duration]
+min_time = 2000
+style = "gold"
+format = "[$duration]($style) "
+
+[character]
+success_symbol = "[❯](bold arc)"
+error_symbol = "[❯](bold red)"

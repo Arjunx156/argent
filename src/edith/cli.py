@@ -5,14 +5,16 @@ import sys
 from collections.abc import Callable
 
 from edith import __version__
-from edith.commands import tools_cmd
+from edith.commands import deploy_cmd, tools_cmd
 from edith.paths import Env, RepoNotFoundError
 from edith.profile import ProfileError
+from edith.render import TemplateError
+from edith.snapshot import UnknownSnapshotError
 from edith.tools import ManifestError
 from edith.ui import Out
 
 Runner = Callable[[argparse.Namespace, Env, Out], int]
-EXPECTED = (ProfileError, ManifestError, RepoNotFoundError)
+EXPECTED = (ProfileError, ManifestError, RepoNotFoundError, TemplateError, UnknownSnapshotError)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -22,7 +24,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"edith {__version__}")
     sub = parser.add_subparsers(title="commands", metavar="<command>")
-    for module in (tools_cmd,):
+    for module in (deploy_cmd, tools_cmd):
         module.register(sub)
     return parser
 

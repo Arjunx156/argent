@@ -6,7 +6,7 @@ import pytest
 
 from edith.deploy import Action, SkipTargetError, Target, apply, plan
 from edith.paths import Env
-from edith.snapshot import list_snapshots, restore
+from edith.snapshot import UnknownSnapshotError, list_snapshots, restore
 from edith.state import State
 
 Clock = Callable[[], datetime]
@@ -166,5 +166,5 @@ def test_restore_puts_back_what_was_there_and_deletes_what_wasnt(env: Env, clock
 
 
 def test_unknown_snapshot_is_a_clear_error(env: Env, clock: Clock) -> None:
-    with pytest.raises(FileNotFoundError, match="no snapshot named"):
+    with pytest.raises(UnknownSnapshotError, match="no snapshot named"):
         restore(env, "19990101-000000", clock=clock)

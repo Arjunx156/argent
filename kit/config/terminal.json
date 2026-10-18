@@ -1,0 +1,37 @@
+{
+  "scheme": {
+    "name": "Edith",
+    "background": "#07090D",
+    "foreground": "#D5DEE8",
+    "cursorColor": "#3DD6F5",
+    "selectionBackground": "#1A2B3C",
+    "black": "#07090D",
+    "red": "#FF4D5E",
+    "green": "#4BE3A0",
+    "yellow": "#F7C548",
+    "blue": "#4C8DFF",
+    "purple": "#A78BFA",
+    "cyan": "#3DD6F5",
+    "white": "#D5DEE8",
+    "brightBlack": "#6A758A",
+    "brightRed": "#FF7A86",
+    "brightGreen": "#7DF0BE",
+    "brightYellow": "#FFDA7A",
+    "brightBlue": "#7FADFF",
+    "brightPurple": "#C4B1FD",
+    "brightCyan": "#8BE9FD",
+    "brightWhite": "#F5F8FB"
+  },
+  "supersedes": ["Tadashi Neon"],
+  "defaults": {
+    "colorScheme": "Edith",
+    "font": { "face": "JetBrainsMono Nerd Font", "size": 11 },
+    "padding": "18, 14",
+    "cursorShape": "bar",
+    "intenseTextStyle": "bright",
+    "scrollbarState": "hidden",
+    "opacity": 97,
+    "useAcrylic": false
+  },
+  "defaultProfileSource": "Windows.Terminal.PowershellCore"
+}
