@@ -1,4 +1,4 @@
-"""Every location edith reads or writes, resolved once so tests can swap the whole machine."""
+"""Every location argent reads or writes, resolved once so tests can swap the whole machine."""
 
 import os
 import sys
@@ -43,6 +43,11 @@ class Env:
 
     @property
     def state(self) -> Path:
+        return self.home / ".argent"
+
+    @property
+    def legacy_state(self) -> Path:
+        """Where argent kept its state on its first day, when it was called edith."""
         return self.home / ".edith"
 
     @property
@@ -60,17 +65,25 @@ class Env:
         return Path(raw)
 
 
+def adopt_legacy_state(env: Env) -> bool:
+    """Move ~/.edith to ~/.argent once, so snapshots from before the rename still restore."""
+    if env.state.exists() or not env.legacy_state.is_dir():
+        return False
+    env.legacy_state.rename(env.state)
+    return True
+
+
 def find_repo() -> Path:
-    override = os.environ.get("EDITH_REPO")
+    override = os.environ.get("ARGENT_REPO")
     candidates = [Path(override)] if override else []
-    # editable installs keep the package inside the repo: repo/src/edith/paths.py
+    # editable installs keep the package inside the repo: repo/src/argent/paths.py
     candidates.append(Path(__file__).resolve().parents[2])
     for candidate in candidates:
         if (candidate / "kit").is_dir() and (candidate / "profile.toml").is_file():
             return candidate
     raise RepoNotFoundError(
-        "edith runs from its repository. Install it with `uv tool install --editable <repo>`, "
-        "or set EDITH_REPO to the repo folder."
+        "argent runs from its repository. Install it with `uv tool install --editable <repo>`, "
+        "or set ARGENT_REPO to the repo folder."
     )
 
 

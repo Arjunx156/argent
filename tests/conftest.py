@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from edith.paths import Env
+from argent.paths import Env
 
 PROFILE = """\
 [me]
@@ -22,7 +22,7 @@ chimes = true
 
 @pytest.fixture
 def env(tmp_path: Path) -> Env:
-    """A whole fake machine: home, app data, documents and an edith repo."""
+    """A whole fake machine: home, app data, documents and an argent repo."""
     home = tmp_path / "home"
     repo = tmp_path / "repo"
     fake = Env(

@@ -1,12 +1,12 @@
-"""edith install."""
+"""argent install."""
 
 import argparse
 from typing import Any
 
-from edith.installer import InstallError, ensure_user_path, install
-from edith.paths import Env
-from edith.tools import detect, load_manifest
-from edith.ui import Out
+from argent.installer import InstallError, ensure_user_path, install
+from argent.paths import Env
+from argent.tools import detect, load_manifest
+from argent.ui import Out
 
 
 def register(sub: Any) -> None:
@@ -54,6 +54,6 @@ def run(args: argparse.Namespace, env: Env, out: Out) -> int:
 
     out.line()
     if failed:
-        out.line(out.dim(f"{failed} need attention; `edith tools --missing` shows the rest"))
-    out.line(out.dim("then `edith deploy`, so the standing orders learn what's new"))
+        out.line(out.dim(f"{failed} need attention; `argent tools --missing` shows the rest"))
+    out.line(out.dim("then `argent deploy`, so the standing orders learn what's new"))
     return 1 if failed else 0

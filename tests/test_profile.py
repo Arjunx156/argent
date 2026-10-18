@@ -1,7 +1,7 @@
 import pytest
 
-from edith.paths import Env
-from edith.profile import ProfileError, load_profile
+from argent.paths import Env
+from argent.profile import ProfileError, load_profile
 
 
 def write_profile(env: Env, text: str) -> None:

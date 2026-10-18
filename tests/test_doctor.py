@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from edith.doctor import (
+from argent.doctor import (
     Context,
     Finding,
     Result,
@@ -19,9 +19,9 @@ from edith.doctor import (
     diagnose,
     system_runner,
 )
-from edith.merge import claude_settings
-from edith.paths import Env
-from edith.state import State
+from argent.merge import claude_settings
+from argent.paths import Env
+from argent.state import State
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -57,7 +57,7 @@ def test_unquoted_statusline_in_a_spaced_home_fails_for_real(spaced: Env) -> Non
 
 
 @pytest.mark.skipif(not shutil.which("python"), reason="the status line runs `python`")
-def test_edith_statusline_runs_in_a_spaced_home(spaced: Env) -> None:
+def test_argent_statusline_runs_in_a_spaced_home(spaced: Env) -> None:
     script = (spaced.claude / "statusline.py").as_posix()
     merged = claude_settings(None, script, chimes=False)
     (spaced.claude / "settings.json").write_bytes(merged)
@@ -86,7 +86,7 @@ def test_only_unscoped_rules_count_as_always_on(env: Env) -> None:
 
     assert finding.status == "warn"
     assert finding.detail.startswith("1 files")
-    assert finding.fix == "edith shelve rules/ecc"
+    assert finding.fix == "argent shelve rules/ecc"
 
 
 def test_skills_switched_off_or_from_the_kit_cost_nothing(env: Env) -> None:
@@ -138,5 +138,5 @@ def test_hook_programs_are_named_by_file(command: str, name: str) -> None:
 
 
 def test_runner_reports_missing_programs() -> None:
-    result = system_runner(["edith-no-such-program-anywhere"])
+    result = system_runner(["argent-no-such-program-anywhere"])
     assert result.code == 127

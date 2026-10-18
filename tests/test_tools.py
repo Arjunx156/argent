@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from edith.paths import Env
-from edith.tools import ManifestError, detect, load_manifest
+from argent.paths import Env
+from argent.tools import ManifestError, detect, load_manifest
 
 REAL_MANIFEST = Path(__file__).resolve().parents[1] / "kit" / "tools.toml"
 

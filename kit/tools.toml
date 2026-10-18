@@ -1,4 +1,4 @@
-# The tool manifest. One entry per tool: where it comes from, how edith finds it,
+# The tool manifest. One entry per tool: where it comes from, how argent finds it,
 # and the phrase the standing orders may use for it. A claim only renders when the
 # tool is detected, so Claude is never told about a tool this machine lacks.
 #
@@ -81,7 +81,7 @@ about = "A readable listing with folders first and git status; `ls`, `ll` and `l
 cmd = "zoxide"
 group = "core"
 winget = "ajeetdsouza.zoxide"
-about = "Jumps to frequent folders from a fragment of the name: `z edith`."
+about = "Jumps to frequent folders from a fragment of the name: `z argent`."
 
 [[tool]]
 cmd = "ast-grep"

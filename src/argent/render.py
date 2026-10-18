@@ -10,7 +10,7 @@ A section tag alone on its line takes the line with it, so sections leave no bla
 import re
 from collections.abc import Callable
 
-from edith.tools import Detection, Manifest
+from argent.tools import Detection, Manifest
 
 STANDALONE = re.compile(r"(?m)^[ \t]*(\{\{[#^/]has[^}]*\}\})[ \t]*\r?\n")
 SECTION = re.compile(r"\{\{([#^])has ([^}]+?)\}\}(.*?)\{\{/has\}\}", re.DOTALL)

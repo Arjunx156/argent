@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from edith.ship import Outcome, ShipError, message_problems, ship
-from edith.ui import Out
+from argent.ship import Outcome, ShipError, message_problems, ship
+from argent.ui import Out
 
 pytestmark = pytest.mark.skipif(not shutil.which("git"), reason="needs git")
 IDENTITY = ["-c", "user.name=t", "-c", "user.email=t@x"]

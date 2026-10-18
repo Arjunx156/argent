@@ -1,12 +1,12 @@
-"""edith ship."""
+"""argent ship."""
 
 import argparse
 from pathlib import Path
 from typing import Any
 
-from edith.paths import Env
-from edith.ship import Outcome, gitleaks_scan, just_check, repo_root, ship
-from edith.ui import Out
+from argent.paths import Env
+from argent.ship import Outcome, gitleaks_scan, just_check, repo_root, ship
+from argent.ui import Out
 
 
 def register(sub: Any) -> None:

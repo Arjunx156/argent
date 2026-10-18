@@ -5,16 +5,20 @@ from pathlib import Path
 
 import pytest
 
-from edith.commands.deploy_cmd import make_plan
-from edith.deploy import apply
-from edith.kit import build_kit
-from edith.paths import Env
-from edith.profile import load_profile
-from edith.render import render
-from edith.tools import Detection, load_manifest
+from argent.commands.deploy_cmd import make_plan
+from argent.deploy import apply
+from argent.kit import build_kit
+from argent.paths import Env
+from argent.profile import load_profile
+from argent.render import render
+from argent.tools import Detection, load_manifest
 
 REPO = Path(__file__).resolve().parents[1]
-TADASHI_PROFILE = "# >>> tadashi >>>\r\nfunction spiderfoot {}\r\n# <<< tadashi <<<\r\n"
+# both predecessors' blocks, the way a machine that ran tadashi and then edith looks
+TADASHI_PROFILE = (
+    "# >>> tadashi >>>\r\nfunction spiderfoot {}\r\n# <<< tadashi <<<\r\n"
+    "# >>> edith >>>\r\nfunction proj {}\r\n# <<< edith <<<\r\n"
+)
 WT = "Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json"
 
 
@@ -47,7 +51,7 @@ def test_every_template_in_the_kit_renders_with_and_without_tools(machine: Env) 
             assert not target.dest.name.endswith(".tmpl")
     for template in (REPO / "kit").rglob("*.tmpl"):
         text = template.read_text(encoding="utf-8")
-        context = {k: "x" for k in ("tools", "projects.roots", "edith.repo")}
+        context = {k: "x" for k in ("tools", "projects.roots", "argent.repo")}
         context |= profile.context()
         render(text, context, lambda _t: True, template.name)
         render(text, context, lambda _t: False, template.name)
@@ -67,10 +71,12 @@ def test_first_deploy_takes_over_from_tadashi(machine: Env) -> None:
 
     profile = (machine.documents / "PowerShell" / "profile.ps1").read_bytes()
     assert b"tadashi" not in profile
-    assert b"# >>> edith >>>\r\n" in profile
+    assert b"edith" not in profile
+    assert profile.count(b"# >>> argent >>>") == 1
+    assert b"# >>> argent >>>\r\n" in profile
 
     wt = json.loads((machine.localappdata / WT).read_text(encoding="utf-8"))
-    assert [s["name"] for s in wt["schemes"]] == ["Edith"]
+    assert [s["name"] for s in wt["schemes"]] == ["Argent"]
 
     authorship = machine.claude / "skills" / "authorship" / "SKILL.md"
     assert "Arjun Krishnan" in authorship.read_text(encoding="utf-8")

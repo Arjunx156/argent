@@ -6,15 +6,17 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-from edith.deploy import Build, Target
-from edith.merge import claude_settings, editor_settings, managed_block, terminal_settings
-from edith.paths import Env
-from edith.profile import Profile
-from edith.render import render, tools_block
-from edith.tools import Detection, Manifest
+from argent.deploy import Build, Target
+from argent.merge import claude_settings, editor_settings, managed_block, terminal_settings
+from argent.paths import Env
+from argent.profile import Profile
+from argent.render import render, tools_block
+from argent.tools import Detection, Manifest
 
 TEMPLATE = ".tmpl"
 FOLIO_VERSION = "1.0.0"
+# shell blocks from what came before: tadashi, then argent under its first name
+RETIRED_BLOCKS = ("edith", "tadashi")
 EDITORS = ("Code", "Cursor", "Antigravity", "Antigravity IDE")
 TERMINALS = (
     "Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json",
@@ -69,7 +71,7 @@ def build_kit(env: Env, profile: Profile, manifest: Manifest, found: Detection) 
     block = (config / "profile.ps1").read_text(encoding="utf-8")
     for shell in ("PowerShell", "WindowsPowerShell"):
         dest = env.documents / shell / "profile.ps1"
-        build = partial(managed_block, body=block, supersedes=("tadashi",))
+        build = partial(managed_block, body=block, supersedes=RETIRED_BLOCKS)
         targets.append(Target(dest, pretty(env, dest), build, whole=False))
 
     theme = read_json(config / "terminal.json")
@@ -97,7 +99,7 @@ def template_context(
         **profile.context(),
         "tools": tools_block(manifest, found),
         "projects.roots": join_words(roots) or "no configured folders",
-        "edith.repo": env.repo.as_posix(),
+        "argent.repo": env.repo.as_posix(),
     }
 
 

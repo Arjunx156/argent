@@ -1,4 +1,4 @@
-"""~/.edith/state.json: the hash of every file edith wrote, which is how drift is spotted."""
+"""~/.argent/state.json: the hash of every file argent wrote, which is how drift is spotted."""
 
 import hashlib
 import json
@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from edith.paths import Env
+from argent.paths import Env
 
 
 def sha256(data: bytes) -> str:
@@ -60,6 +60,6 @@ class State:
 def write_atomic(dest: Path, content: bytes) -> None:
     """Write beside the target, then swap, so a crash never leaves half a file."""
     dest.parent.mkdir(parents=True, exist_ok=True)
-    tmp = dest.with_name(f".{dest.name}.edith-tmp")
+    tmp = dest.with_name(f".{dest.name}.argent-tmp")
     tmp.write_bytes(content)
     tmp.replace(dest)

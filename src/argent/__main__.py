@@ -1,3 +1,3 @@
-from edith.cli import main
+from argent.cli import main
 
 raise SystemExit(main())

@@ -1,4 +1,4 @@
-# Who edith works for. Templates read this; nothing else hardcodes it.
+# Who argent works for. Templates read this; nothing else hardcodes it.
 
 [me]
 name = "Arjun Krishnan"
@@ -8,7 +8,7 @@ about = "AI student at Amrita Vishwa Vidyapeetham who builds GenAI apps (agents,
 university = "Amrita Vishwa Vidyapeetham"
 
 [projects]
-# where `edith projects` looks for repositories, two levels deep
+# where `argent projects` looks for repositories, two levels deep
 roots = [
   "~/Desktop/Desktop/personal projects",
   "D:/Personal projects2.0",

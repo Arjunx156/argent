@@ -1,6 +1,6 @@
 {
   "scheme": {
-    "name": "Edith",
+    "name": "Argent",
     "background": "#07090D",
     "foreground": "#D5DEE8",
     "cursorColor": "#3DD6F5",
@@ -22,9 +22,9 @@
     "brightCyan": "#8BE9FD",
     "brightWhite": "#F5F8FB"
   },
-  "supersedes": ["Tadashi Neon"],
+  "supersedes": ["Edith", "Tadashi Neon"],
   "defaults": {
-    "colorScheme": "Edith",
+    "colorScheme": "Argent",
     "font": { "face": "JetBrainsMono Nerd Font", "size": 11 },
     "padding": "18, 14",
     "cursorShape": "bar",

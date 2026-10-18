@@ -29,7 +29,7 @@ One person, one problem, one flow that ends on a moment worth filming. Write tha
 3. Replace fakes with real parts in the order a judge sees them.
 4. Feature freeze at 75% of the clock. The last quarter is polish, README, video, deck and submission, and it always takes the whole quarter.
 
-Commit and push with `edith ship` after each step, so the history tells the story and a dead laptop costs nothing.
+Commit and push with `argent ship` after each step, so the history tells the story and a dead laptop costs nothing.
 
 ## Stack defaults (all free tiers)
 

@@ -1,11 +1,11 @@
-"""edith tools: what the manifest wants and what this machine has."""
+"""argent tools: what the manifest wants and what this machine has."""
 
 import argparse
 from typing import Any
 
-from edith.paths import Env
-from edith.tools import detect, load_manifest
-from edith.ui import Out
+from argent.paths import Env
+from argent.tools import detect, load_manifest
+from argent.ui import Out
 
 
 def register(sub: Any) -> None:
@@ -39,5 +39,5 @@ def run(args: argparse.Namespace, env: Env, out: Out) -> int:
     out.line()
     out.line(f"{len(tools) - missing} of {len(tools)} installed")
     if missing:
-        out.line(out.dim("install what's missing with `edith install <group>`"))
+        out.line(out.dim("install what's missing with `argent install <group>`"))
     return 0

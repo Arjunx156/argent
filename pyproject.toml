@@ -1,5 +1,5 @@
 [project]
-name = "edith"
+name = "argent"
 version = "0.1.0"
 description = "Arjun Krishnan's engineering environment: one repo that rebuilds the machine and keeps it honest."
 readme = "README.md"
@@ -8,7 +8,7 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
-edith = "edith.cli:main"
+argent = "argent.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.11.24,<0.12.0"]

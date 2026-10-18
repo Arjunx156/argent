@@ -1,7 +1,7 @@
-"""Builds for files edith shares with the user: JSON settings and managed shell blocks.
+"""Builds for files argent shares with the user: JSON settings and managed shell blocks.
 
 Each function takes the file's current bytes and returns the bytes it should hold. When
-nothing edith owns has changed, the original bytes come back untouched, so a file with
+nothing argent owns has changed, the original bytes come back untouched, so a file with
 odd formatting isn't rewritten on every deploy.
 """
 
@@ -9,7 +9,7 @@ import copy
 import json
 from typing import Any
 
-from edith.deploy import SkipTargetError
+from argent.deploy import SkipTargetError
 
 CHIME_MARK = "Media.SoundPlayer"
 CHIMES = {"Stop": "Windows Notify Calendar", "Notification": "Windows Notify Messaging"}
@@ -101,9 +101,9 @@ def editor_settings(current: bytes | None, wanted: dict[str, Any]) -> bytes:
 
 
 def managed_block(
-    current: bytes | None, body: str, name: str = "edith", supersedes: tuple[str, ...] = ()
+    current: bytes | None, body: str, name: str = "argent", supersedes: tuple[str, ...] = ()
 ) -> bytes:
-    """Own one marked block in a shared file; retire blocks from tools edith replaces."""
+    """Own one marked block in a shared file; retire blocks from tools argent replaces."""
     raw = current or b""
     bom = raw.startswith(b"\xef\xbb\xbf")
     try:

@@ -1,4 +1,4 @@
-"""Terminal output: one tagged line per fact, in the Edith palette."""
+"""Terminal output: one tagged line per fact, in the Argent palette."""
 
 import os
 import sys

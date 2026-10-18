@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from edith.installer import (
+from argent.installer import (
     ALREADY_INSTALLED,
     InstallError,
     install,
@@ -14,8 +14,8 @@ from edith.installer import (
     steps_for,
     verified_exe,
 )
-from edith.paths import Env
-from edith.tools import Release, load_manifest
+from argent.paths import Env
+from argent.tools import Release, load_manifest
 
 KIT = Path(__file__).resolve().parents[1] / "kit"
 MANIFEST = load_manifest(KIT / "tools.toml")

@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from edith.deploy import Action, SkipTargetError, Target, apply, plan
-from edith.paths import Env
-from edith.snapshot import UnknownSnapshotError, list_snapshots, restore
-from edith.state import State
+from argent.deploy import Action, SkipTargetError, Target, apply, plan
+from argent.paths import Env
+from argent.snapshot import UnknownSnapshotError, list_snapshots, restore
+from argent.state import State
 
 Clock = Callable[[], datetime]
 
@@ -87,7 +87,7 @@ def test_foreign_files_are_adopted_with_a_backup(env: Env, clock: Clock) -> None
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(b"tadashi wrote this")
 
-    actions = deploy(env, [target(dest, b"edith")], clock)
+    actions = deploy(env, [target(dest, b"argent")], clock)
 
     assert kinds(actions) == {"settings.txt": "adopt"}
     snapshot = list_snapshots(env)[-1]
@@ -143,16 +143,16 @@ def test_a_failing_write_still_saves_what_was_written(
     env: Env, clock: Clock, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     first, second = env.home / "first.txt", env.home / "second.txt"
-    import edith.deploy
+    import argent.deploy
 
-    real = edith.deploy.write_atomic
+    real = argent.deploy.write_atomic
 
     def flaky(dest: Path, content: bytes) -> None:
         if dest == second:
             raise PermissionError("locked")
         real(dest, content)
 
-    monkeypatch.setattr(edith.deploy, "write_atomic", flaky)
+    monkeypatch.setattr(argent.deploy, "write_atomic", flaky)
     with pytest.raises(PermissionError):
         deploy(env, [target(first, b"1"), target(second, b"2")], clock)
     assert State.load(env).owns(first)
@@ -170,7 +170,7 @@ def test_merged_files_never_drift(env: Env, clock: Clock) -> None:
     dest = env.home / "settings.json"
     deploy(env, [target(dest, b"{}", whole=False)], clock)
     dest.write_bytes(b'{"user": 1}')
-    actions = deploy(env, [target(dest, b'{"user": 1, "edith": 1}', whole=False)], clock)
+    actions = deploy(env, [target(dest, b'{"user": 1, "argent": 1}', whole=False)], clock)
     assert kinds(actions) == {"settings.json": "update"}
 
 
@@ -188,7 +188,7 @@ def test_restore_puts_back_what_was_there_and_deletes_what_wasnt(env: Env, clock
     old, fresh = env.home / "old.txt", env.home / "new.txt"
     old.parent.mkdir(parents=True, exist_ok=True)
     old.write_bytes(b"original")
-    deploy(env, [target(old, b"edith"), target(fresh, b"edith")], clock)
+    deploy(env, [target(old, b"argent"), target(fresh, b"argent")], clock)
     name = list_snapshots(env)[-1].name
 
     restored = restore(env, name, clock=clock)
@@ -203,7 +203,7 @@ def test_restore_puts_back_what_was_there_and_deletes_what_wasnt(env: Env, clock
 
 def test_restore_journals_before_it_touches_anything(env: Env, clock: Clock) -> None:
     dest = env.home / "a.txt"
-    deploy(env, [target(dest, b"edith")], clock)
+    deploy(env, [target(dest, b"argent")], clock)
     name = list_snapshots(env)[-1].name
     dest.unlink()
     dest.mkdir()  # a folder where the snapshot expects to delete a file
@@ -216,3 +216,14 @@ def test_restore_journals_before_it_touches_anything(env: Env, clock: Clock) -> 
 def test_unknown_snapshot_is_a_clear_error(env: Env, clock: Clock) -> None:
     with pytest.raises(UnknownSnapshotError, match="no snapshot named"):
         restore(env, "19990101-000000", clock=clock)
+
+
+def test_removing_a_folders_last_file_removes_the_folder(env: Env, clock: Clock) -> None:
+    skills = env.home / ".claude" / "skills"
+    old, kept = skills / "old" / "SKILL.md", skills / "kept" / "SKILL.md"
+    deploy(env, [target(old, b"o"), target(kept, b"k")], clock)
+
+    deploy(env, [target(kept, b"k")], clock)
+
+    assert not (skills / "old").exists()
+    assert kept.is_file()

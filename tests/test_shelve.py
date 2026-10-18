@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from edith.commands.shelve_cmd import ShelfError, read_index, run_shelve, run_unshelve
-from edith.paths import Env
-from edith.ui import Out
+from argent.commands.shelve_cmd import ShelfError, read_index, run_shelve, run_unshelve
+from argent.paths import Env
+from argent.ui import Out
 
 REPO = Path(__file__).resolve().parents[1]
 

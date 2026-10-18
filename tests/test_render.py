@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from edith.render import TemplateError, render, tools_block
-from edith.tools import Detection, load_manifest
+from argent.render import TemplateError, render, tools_block
+from argent.tools import Detection, load_manifest
 
 KIT = Path(__file__).resolve().parents[1] / "kit"
 CONTEXT = {"me.name": "Test Person"}
@@ -68,7 +68,7 @@ def test_the_real_standing_orders_render_both_ways(has: Callable[[str], bool]) -
         "me.university": "u",
         "tools": "  - Search: `rg` for text.",
         "projects.roots": "`~/code`",
-        "edith.repo": "C:/edith",
+        "argent.repo": "C:/argent",
     }
     text = (KIT / "claude" / "CLAUDE.md.tmpl").read_text(encoding="utf-8")
     rendered = render(text, context, has, "CLAUDE.md")

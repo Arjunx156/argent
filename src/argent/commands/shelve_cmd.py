@@ -1,12 +1,12 @@
-"""edith shelve and unshelve: park Claude config edith doesn't manage, and bring it back."""
+"""argent shelve and unshelve: park Claude config argent doesn't manage, and bring it back."""
 
 import argparse
 import shutil
 from pathlib import Path
 from typing import Any
 
-from edith.paths import Env
-from edith.ui import Out
+from argent.paths import Env
+from argent.ui import Out
 
 INDEX = "index.txt"
 PROTECTED = {"CLAUDE.md", "settings.json", "statusline.py", ".credentials.json", "projects"}
@@ -32,7 +32,7 @@ def resolve(env: Env, raw: str) -> tuple[Path, Path, str]:
     # windows paths ignore case, so the guards must too
     top = rel.parts[0].casefold()
     if top in {p.casefold() for p in PROTECTED} or top == INDEX:
-        raise ShelfError(f"{raw}: edith or Claude Code owns that; it can't be shelved")
+        raise ShelfError(f"{raw}: argent or Claude Code owns that; it can't be shelved")
     ours = {p.name.casefold() for p in (env.kit / "claude" / "skills").iterdir() if p.is_dir()}
     if top == "skills" and len(rel.parts) > 1 and rel.parts[1].casefold() in ours:
         raise ShelfError(f"{raw}: that skill comes from the kit; remove it there instead")
@@ -53,7 +53,7 @@ def run_shelve(args: argparse.Namespace, env: Env, out: Out) -> int:
         shutil.move(str(live), str(parked))
         index.append(rel)
         write_index(env, index)
-        out.tag("set", f"shelved {rel}  {out.dim('edith unshelve ' + rel + ' brings it back')}")
+        out.tag("set", f"shelved {rel}  {out.dim('argent unshelve ' + rel + ' brings it back')}")
     out.line(out.dim("new Claude sessions start without it"))
     return 0
 
@@ -63,7 +63,7 @@ def run_unshelve(args: argparse.Namespace, env: Env, out: Out) -> int:
     for raw in args.paths:
         live, parked, rel = resolve(env, raw)
         if not parked.exists() and not parked.is_symlink():
-            raise ShelfError(f"{raw}: not on the shelf; `edith shelve` lists it")
+            raise ShelfError(f"{raw}: not on the shelf; `argent shelve` lists it")
         if live.exists() or live.is_symlink():
             raise ShelfError(f"{raw}: something already lives there; move it first")
         live.parent.mkdir(parents=True, exist_ok=True)
@@ -79,12 +79,12 @@ def list_shelf(env: Env, out: Out) -> int:
     shelved = read_index(env)
     out.heading("shelf")
     if not shelved:
-        out.line(out.dim("  empty. `edith doctor` names what's worth parking"))
+        out.line(out.dim("  empty. `argent doctor` names what's worth parking"))
         return 0
     for rel in shelved:
         out.tag("info", rel)
     out.line()
-    out.line(out.dim("bring one back with `edith unshelve <path>`"))
+    out.line(out.dim("bring one back with `argent unshelve <path>`"))
     return 0
 
 

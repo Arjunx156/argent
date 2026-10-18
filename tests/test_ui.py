@@ -2,7 +2,7 @@ import io
 
 import pytest
 
-from edith.ui import Out, wants_colour
+from argent.ui import Out, wants_colour
 
 
 def test_plain_output_has_aligned_tags_and_no_escapes() -> None:

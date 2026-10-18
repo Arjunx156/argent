@@ -1,4 +1,4 @@
-"""edith ship: message rules, secret scan, project checks, commit, push. In that order."""
+"""argent ship: message rules, secret scan, project checks, commit, push. In that order."""
 
 import re
 import shutil
@@ -7,7 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from edith.ui import Out
+from argent.ui import Out
 
 SUBJECT_MAX = 60
 ATTRIBUTION = re.compile(
@@ -164,7 +164,9 @@ def _tail(text: str) -> str:
 def gitleaks_scan(repo: Path, args: list[str]) -> Outcome:
     exe = shutil.which("gitleaks")
     if not exe:
-        raise ShipError("gitleaks isn't installed, and nothing ships unscanned: edith install core")
+        raise ShipError(
+            "gitleaks isn't installed, and nothing ships unscanned: argent install core"
+        )
     done = subprocess.run(
         [exe, "git", "--no-banner", "--redact", *args, str(repo)],
         capture_output=True,

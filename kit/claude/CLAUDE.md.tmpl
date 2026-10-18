@@ -1,6 +1,6 @@
 # Standing orders
 
-These apply to every project. A project's own CLAUDE.md adds to them and never lowers them. Edith renders this file from `{{ edith.repo }}`; change it there and run `edith deploy`, never here.
+These apply to every project. A project's own CLAUDE.md adds to them and never lowers them. Argent renders this file from `{{ argent.repo }}`; change it there and run `argent deploy`, never here.
 
 ## Who this is for
 {{ me.name }}: {{ me.about }}
@@ -23,14 +23,14 @@ These apply to every project. A project's own CLAUDE.md adds to them and never l
 - Windows 11, PowerShell 7 by default, with Git Bash available. The home folder has a space in it, so quote every path.
 - The budget is zero: only free tools and free tiers.
 - Claude Code is the only coding agent. Never install Codex, Gemini CLI or aider.
-- Edith manages this machine. `edith doctor` reports what's wrong, `edith tools` lists what's installed, and `edith install <group>` adds a missing group.
+- Argent manages this machine. `argent doctor` reports what's wrong, `argent tools` lists what's installed, and `argent install <group>` adds a missing group.
 - Tools, each one verified present when this file was rendered:
 {{ tools }}
 - Start anything new with the **genesis** skill.
 
 ## Projects and git
-- Projects live in {{ projects.roots }}. `edith projects` shows which are dirty, unpushed or missing a remote.
-- Commit and push with `edith ship -m "message"`: it scans for secrets, runs `just check` when the project has one, then commits and pushes.
+- Projects live in {{ projects.roots }}. `argent projects` shows which are dirty, unpushed or missing a remote.
+- Commit and push with `argent ship -m "message"`: it scans for secrets, runs `just check` when the project has one, then commits and pushes.
 
 ## Authorship
 - The user is {{ me.name }} ({{ me.email }}, GitHub {{ me.github }}). Their name goes wherever work carries a name: author on documents, "Submitted by" on reports, "Engineered by" in READMEs and their sites' footers, package author fields, and `<meta name="author">`.
@@ -68,14 +68,14 @@ These apply to every project. A project's own CLAUDE.md adds to them and never l
 - When .tex source itself is required (a journal or university template), compile it with `tectonic -X compile file.tex`. It fetches packages itself. Never install another TeX engine.
 {{/has}}
 {{^has tectonic}}
-- Tectonic isn't installed. When .tex source itself is required, say so and offer `edith install docs`. Never install a TeX engine mid-task.
+- Tectonic isn't installed. When .tex source itself is required, say so and offer `argent install docs`. Never install a TeX engine mid-task.
 {{/has}}
 - Coursework for {{ me.university }}, such as reports, lab records and assignments, follows the **coursework** skill.
 {{#has soffice}}
 - Word, PowerPoint and Excel files are handled by their skills, with LibreOffice, QPDF and Tesseract installed. Never pip or npm install for a document task.
 {{/has}}
 {{^has soffice}}
-- Word, PowerPoint and Excel files are handled by their skills. The Office toolchain isn't installed; when a task needs it, say so and offer `edith install docs` rather than installing mid-task.
+- Word, PowerPoint and Excel files are handled by their skills. The Office toolchain isn't installed; when a task needs it, say so and offer `argent install docs` rather than installing mid-task.
 {{/has}}
 
 ## Privacy

@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from edith.deploy import SkipTargetError
-from edith.merge import claude_settings, editor_settings, managed_block, terminal_settings
+from argent.deploy import SkipTargetError
+from argent.merge import claude_settings, editor_settings, managed_block, terminal_settings
 
 STATUSLINE = "C:/Users/A B/.claude/statusline.py"
 TADASHI_SETTINGS = {
@@ -45,9 +45,9 @@ def test_settings_with_comments_are_skipped_not_mangled() -> None:
 
 
 THEME = {
-    "scheme": {"name": "Edith", "background": "#07090D"},
+    "scheme": {"name": "Argent", "background": "#07090D"},
     "supersedes": ["Tadashi Neon"],
-    "defaults": {"colorScheme": "Edith"},
+    "defaults": {"colorScheme": "Argent"},
     "defaultProfileSource": "Windows.Terminal.PowershellCore",
 }
 
@@ -65,9 +65,9 @@ def terminal(with_pwsh: bool) -> dict[str, object]:
 
 def test_terminal_retires_tadashi_and_repoints_profiles() -> None:
     merged = json.loads(terminal_settings(as_bytes(terminal(True), 4), THEME))
-    assert [s["name"] for s in merged["schemes"]] == ["Mine", "Edith"]
-    assert merged["profiles"]["defaults"]["colorScheme"] == "Edith"
-    assert merged["profiles"]["list"][0]["colorScheme"] == "Edith"
+    assert [s["name"] for s in merged["schemes"]] == ["Mine", "Argent"]
+    assert merged["profiles"]["defaults"]["colorScheme"] == "Argent"
+    assert merged["profiles"]["list"][0]["colorScheme"] == "Argent"
     assert merged["defaultProfile"] == "{ps7}"
 
 
@@ -94,7 +94,7 @@ BODY = "Set-Alias lg lazygit"
 def test_block_is_appended_to_a_new_profile_with_crlf() -> None:
     assert (
         managed_block(None, BODY)
-        == b"# >>> edith >>>\r\nSet-Alias lg lazygit\r\n# <<< edith <<<\r\n"
+        == b"# >>> argent >>>\r\nSet-Alias lg lazygit\r\n# <<< argent <<<\r\n"
     )
 
 
@@ -104,7 +104,7 @@ def test_block_replaces_tadashi_in_place_and_keeps_the_rest() -> None:
     )
     merged = managed_block(profile, BODY, supersedes=("tadashi",))
     assert merged == (
-        b"Import-Module posh\r\n# >>> edith >>>\r\nSet-Alias lg lazygit\r\n# <<< edith <<<\r\n"
+        b"Import-Module posh\r\n# >>> argent >>>\r\nSet-Alias lg lazygit\r\n# <<< argent <<<\r\n"
         b"$x = 1\r\n"
     )
 
@@ -112,7 +112,7 @@ def test_block_replaces_tadashi_in_place_and_keeps_the_rest() -> None:
 def test_block_keeps_lf_files_lf_and_bom_files_bom() -> None:
     lf = managed_block(b"$a = 1\n", BODY)
     assert b"\r\n" not in lf
-    assert lf.startswith(b"$a = 1\n\n# >>> edith >>>\n")
+    assert lf.startswith(b"$a = 1\n\n# >>> argent >>>\n")
     bom = managed_block(b"\xef\xbb\xbf$a = 1\r\n", BODY)
     assert bom.startswith(b"\xef\xbb\xbf$a = 1\r\n")
 
@@ -124,7 +124,7 @@ def test_block_is_idempotent() -> None:
 
 def test_unclosed_block_is_refused() -> None:
     with pytest.raises(SkipTargetError, match="never closed"):
-        managed_block(b"# >>> edith >>>\r\nhalf a block\r\n", BODY)
+        managed_block(b"# >>> argent >>>\r\nhalf a block\r\n", BODY)
 
 
 def test_terminal_handles_light_and_dark_scheme_pairs() -> None:
@@ -132,7 +132,7 @@ def test_terminal_handles_light_and_dark_scheme_pairs() -> None:
     first = settings["profiles"]["list"][0]  # pyright: ignore[reportIndexIssue]
     first["colorScheme"] = {"dark": "Tadashi Neon", "light": "Mine"}
     merged = json.loads(terminal_settings(as_bytes(settings, 4), THEME))
-    assert merged["profiles"]["list"][0]["colorScheme"] == {"dark": "Edith", "light": "Mine"}
+    assert merged["profiles"]["list"][0]["colorScheme"] == {"dark": "Argent", "light": "Mine"}
 
 
 def test_a_profile_that_isnt_utf8_is_skipped() -> None:

@@ -1,7 +1,7 @@
 import pytest
 
-from edith import __version__
-from edith.cli import main
+from argent import __version__
+from argent.cli import main
 
 
 def test_version_prints_and_exits_clean(capsys: pytest.CaptureFixture[str]) -> None:

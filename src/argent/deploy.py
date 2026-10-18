@@ -1,7 +1,7 @@
 """Plan what a deploy would change, then apply it behind a snapshot.
 
 A target says what a file should contain, given what it contains now. Whole targets are
-files edith owns outright; partial ones (merged JSON, a managed block) share the file
+files argent owns outright; partial ones (merged JSON, a managed block) share the file
 with the user, so only whole targets can drift.
 """
 
@@ -10,9 +10,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from edith.paths import Env
-from edith.snapshot import Snapshot
-from edith.state import State, key, sha256, write_atomic
+from argent.paths import Env
+from argent.snapshot import Snapshot
+from argent.state import State, key, sha256, write_atomic
 
 Build = Callable[[bytes | None], bytes | None]
 WRITES = {"new", "update", "adopt", "remove"}
@@ -93,10 +93,10 @@ def _plan_one(target: Target, state: State) -> Action:
         return act("update", desired)
     recorded = state.recorded(target.dest)
     if recorded is None:
-        return act("adopt", desired, "not written by edith; the original goes in the snapshot")
+        return act("adopt", desired, "not written by argent; the original goes in the snapshot")
     if recorded == sha256(current):
         return act("update", desired)
-    return act("drift", desired, "edited since edith wrote it; --force overwrites")
+    return act("drift", desired, "edited since argent wrote it; --force overwrites")
 
 
 def _plan_stale(dest: Path, state: State) -> Action:
@@ -150,6 +150,7 @@ def apply(
             if action.desired is None:
                 action.dest.unlink(missing_ok=True)
                 state.forget(action.dest)
+                _prune_empty(action.dest.parent, stop=env.home)
                 continue
             write_atomic(action.dest, action.desired)
             if action.whole:
@@ -162,6 +163,15 @@ def apply(
         # a failed write mid-run must not orphan the hashes of the writes before it
         state.save()
     return snapshot.path if snapshot else None
+
+
+def _prune_empty(folder: Path, stop: Path) -> None:
+    """Folders emptied by a removal go too, so a dropped skill leaves no husk behind."""
+    while folder != stop and folder.is_relative_to(stop) and folder.is_dir():
+        if any(folder.iterdir()):
+            return
+        folder.rmdir()
+        folder = folder.parent
 
 
 def _forceable(action: Action) -> bool:

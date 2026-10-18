@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   check:
-    # edith is a windows kit, so it's tested where it runs
+    # argent is a windows kit, so it's tested where it runs
     runs-on: windows-latest
     timeout-minutes: 15
     steps:

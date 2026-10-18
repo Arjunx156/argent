@@ -1,4 +1,4 @@
-"""edith doctor: every claim about this machine, checked against the machine."""
+"""argent doctor: every claim about this machine, checked against the machine."""
 
 import json
 import os
@@ -11,18 +11,18 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
-from edith.commands.deploy_cmd import Planned, make_plan
-from edith.kit import pretty
-from edith.merge import CHIME_MARK
-from edith.paths import Env
-from edith.profile import Profile, load_profile
-from edith.projects import survey
-from edith.render import branched_tools
-from edith.state import State
-from edith.tools import Detection, Manifest, detect, load_manifest, search_path
+from argent.commands.deploy_cmd import Planned, make_plan
+from argent.kit import pretty
+from argent.merge import CHIME_MARK
+from argent.paths import Env
+from argent.profile import Profile, load_profile
+from argent.projects import survey
+from argent.render import branched_tools
+from argent.state import State
+from argent.tools import Detection, Manifest, detect, load_manifest, search_path
 
 STATUSLINE_SAMPLE = json.dumps(
-    {"workspace": {"current_dir": "C:/edith-doctor"}, "model": {"display_name": "Doctor"}}
+    {"workspace": {"current_dir": "C:/argent-doctor"}, "model": {"display_name": "Doctor"}}
 ).encode()
 FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---", re.DOTALL)
 
@@ -120,7 +120,7 @@ def check_git_identity(ctx: Context) -> list[Finding]:
 def check_github(ctx: Context) -> list[Finding]:
     status = ctx.run(["gh", "auth", "status", "--hostname", "github.com"])
     if status.code == 127:
-        return [Finding("fail", "github", "gh isn't installed", "edith install core")]
+        return [Finding("fail", "github", "gh isn't installed", "argent install core")]
     text = status.out + status.err
     account = re.search(r"account (\S+)", text)
     if status.code != 0 or not account:
@@ -141,10 +141,10 @@ def check_tools(ctx: Context) -> list[Finding]:
             findings.append(Finding("pass", f"tools: {group}", f"all {len(tools)} installed"))
         elif group == "core":
             detail = f"{have}; missing {', '.join(missing)}"
-            findings.append(Finding("fail", "tools: core", detail, "edith install core"))
+            findings.append(Finding("fail", "tools: core", detail, "argent install core"))
         else:
             detail = f"{have}; missing {', '.join(missing)}"
-            findings.append(Finding("info", f"tools: {group}", detail, f"edith install {group}"))
+            findings.append(Finding("info", f"tools: {group}", detail, f"argent install {group}"))
     return findings
 
 
@@ -155,18 +155,18 @@ def check_kit(ctx: Context) -> list[Finding]:
     pending = [a for a in actions if a.writes]
     findings: list[Finding] = []
     for action in drift:
-        detail = f"{action.label} was edited by hand since edith wrote it"
-        fix = "keep it: copy the change into the kit; drop it: edith deploy --force"
+        detail = f"{action.label} was edited by hand since argent wrote it"
+        fix = "keep it: copy the change into the kit; drop it: argent deploy --force"
         findings.append(Finding("warn", "kit drift", detail, fix))
     for action in (a for a in actions if a.kind == "stray"):
         detail = f"{pretty(ctx.env, action.dest)} sits in a kit folder but isn't in the kit"
-        fix = "keep it: add it to the kit; drop it: edith deploy --force"
+        fix = "keep it: add it to the kit; drop it: argent deploy --force"
         findings.append(Finding("warn", "kit drift", detail, fix))
     for action in skipped:
         findings.append(Finding("warn", "kit", f"{action.label}: {action.reason}"))
     if pending:
         detail = f"{len(pending)} files differ from the kit"
-        findings.append(Finding("warn", "kit", detail, "edith diff, then edith deploy"))
+        findings.append(Finding("warn", "kit", detail, "argent diff, then argent deploy"))
     if not findings:
         findings.append(Finding("pass", "kit", f"all {len(actions)} files in place"))
     return findings
@@ -175,7 +175,7 @@ def check_kit(ctx: Context) -> list[Finding]:
 def check_claims(ctx: Context) -> list[Finding]:
     state = State.load(ctx.env)
     if not state.tools:
-        return [Finding("info", "standing orders", "never deployed by edith", "edith deploy")]
+        return [Finding("info", "standing orders", "never deployed by argent", "argent deploy")]
     claimed = {t.cmd for t in ctx.manifest.tools if t.claim}
     for template in ctx.env.kit.rglob("*.tmpl"):
         claimed |= branched_tools(template.read_text(encoding="utf-8"))
@@ -184,10 +184,10 @@ def check_claims(ctx: Context) -> list[Finding]:
     findings: list[Finding] = []
     if gone:
         detail = f"they tell Claude to use {', '.join(gone)}, which are gone"
-        findings.append(Finding("fail", "standing orders", detail, "edith deploy"))
+        findings.append(Finding("fail", "standing orders", detail, "argent deploy"))
     if new:
         detail = f"{', '.join(new)} arrived since the last deploy; Claude doesn't know yet"
-        findings.append(Finding("warn", "standing orders", detail, "edith deploy"))
+        findings.append(Finding("warn", "standing orders", detail, "argent deploy"))
     if not findings:
         findings.append(Finding("pass", "standing orders", "every tool they name is installed"))
     return findings
@@ -197,12 +197,12 @@ def check_statusline(ctx: Context) -> list[Finding]:
     line = ctx.claude_settings.get("statusLine") or {}
     command = line.get("command") if isinstance(line, dict) else None
     if not command:
-        return [Finding("info", "status line", "none configured", "edith deploy")]
+        return [Finding("info", "status line", "none configured", "argent deploy")]
     result = ctx.run(command, stdin=STATUSLINE_SAMPLE, shell=True, timeout=10)
     if result.code != 0 or not result.out:
         first = next((ln for ln in reversed(result.err.splitlines()) if ln.strip()), "no output")
         detail = f"`{command}` exits {result.code}: {first.strip()}"
-        return [Finding("fail", "status line", detail, "edith deploy")]
+        return [Finding("fail", "status line", detail, "argent deploy")]
     return [Finding("pass", "status line", "runs and prints")]
 
 
@@ -217,10 +217,10 @@ def check_rules(ctx: Context) -> list[Finding]:
     folders = sorted({pretty(ctx.env, p.parent) for p in always})
     detail = (
         f"{len(always)} files ({size / 1024:.0f} KB) load into every session beside the standing "
-        f"orders, from {', '.join(folders)}. Edith doesn't manage them, so they can contradict it"
+        f"orders, from {', '.join(folders)}. Argent doesn't manage them, so they can contradict it"
     )
     shelf = ", ".join(sorted({f"rules/{p.relative_to(rules).parts[0]}" for p in always}))
-    return [Finding("warn", "always-on rules", detail, f"edith shelve {shelf}")]
+    return [Finding("warn", "always-on rules", detail, f"argent shelve {shelf}")]
 
 
 def _scoped_rule(path: Path) -> bool:
@@ -239,7 +239,7 @@ def check_hooks(ctx: Context) -> list[Finding]:
                 command = str(hook.get("command", ""))
                 if CHIME_MARK in command:
                     continue
-                detail = f"{event} runs {_short(command)}, which edith doesn't manage"
+                detail = f"{event} runs {_short(command)}, which argent doesn't manage"
                 findings.append(Finding("info", "hooks", detail))
     return findings
 
@@ -266,7 +266,7 @@ def check_skills(ctx: Context) -> list[Finding]:
         f"{len(loaded)} active skills outside the kit add {size / 1024:.1f} KB of descriptions "
         f"to every session: {names}"
     )
-    return [Finding("info", "skills", detail, "edith shelve skills/<name> parks one")]
+    return [Finding("info", "skills", detail, "argent shelve skills/<name> parks one")]
 
 
 def _description_size(card: Path) -> int:
@@ -283,7 +283,7 @@ def check_path(ctx: Context) -> list[Finding]:
     user = user_path()
     if user is not None and not any(_same(p, local_bin) for p in user):
         detail = f"{pretty(ctx.env, local_bin)} isn't on your user PATH, so uv tools vanish"
-        findings.append(Finding("warn", "PATH", detail, "edith install core adds it"))
+        findings.append(Finding("warn", "PATH", detail, "argent install core adds it"))
     uvs = [f for f in search_path(ctx.env).split(os.pathsep) if (Path(f) / _exe("uv")).is_file()]
     if len(uvs) > 1:
         where = ", ".join(pretty(ctx.env, Path(f)) for f in uvs)
@@ -328,7 +328,7 @@ def check_projects(ctx: Context) -> list[Finding]:
     }
     parts = ", ".join(f"{n} {kind}" for kind, n in kinds.items() if n)
     detail = f"{len(needy)} of {len(projects)} need you: {parts}"
-    findings.append(Finding("info", "projects", detail, "edith projects --attention"))
+    findings.append(Finding("info", "projects", detail, "argent projects --attention"))
     return findings
 
 
@@ -339,7 +339,7 @@ def check_snapshots(ctx: Context) -> list[Finding]:
     folders = [p for p in snaps.iterdir() if p.is_dir()]
     size = sum(f.stat().st_size for f in snaps.rglob("*") if f.is_file())
     detail = f"{len(folders)} kept, {size / 1_048_576:.1f} MB in {pretty(ctx.env, snaps)}"
-    return [Finding("info", "snapshots", detail, "edith restore lists them")]
+    return [Finding("info", "snapshots", detail, "argent restore lists them")]
 
 
 CHECKS: list[tuple[str, Check]] = [

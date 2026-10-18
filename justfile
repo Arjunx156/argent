@@ -2,9 +2,9 @@ set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
 
 default: check
 
-# Run edith from the source tree
+# Run argent from the source tree
 dev *args:
-    uv run edith {{args}}
+    uv run argent {{args}}
 
 # Format check, lint, types, tests
 check:

@@ -1,12 +1,12 @@
-"""edith projects."""
+"""argent projects."""
 
 import argparse
 from typing import Any
 
-from edith.paths import Env
-from edith.profile import load_profile
-from edith.projects import ago, survey
-from edith.ui import Out
+from argent.paths import Env
+from argent.profile import load_profile
+from argent.projects import ago, survey
+from argent.ui import Out
 
 
 def register(sub: Any) -> None:

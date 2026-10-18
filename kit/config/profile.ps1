@@ -4,11 +4,11 @@ if ((Get-Command fnm -ErrorAction SilentlyContinue) -and -not $env:FNM_MULTISHEL
 }
 
 # interactive shells only; scripts and agents get stock powershell
-$edithArgs = [Environment]::GetCommandLineArgs()
-$edithInteractive = [Environment]::UserInteractive -and -not ($edithArgs -match '^-noni') -and
-  (($edithArgs -match '^-noe') -or -not ($edithArgs -match '^-(c|com|command|f|file|e|ec|encodedcommand)$'))
+$argentArgs = [Environment]::GetCommandLineArgs()
+$argentInteractive = [Environment]::UserInteractive -and -not ($argentArgs -match '^-noni') -and
+  (($argentArgs -match '^-noe') -or -not ($argentArgs -match '^-(c|com|command|f|file|e|ec|encodedcommand)$'))
 
-if ($edithInteractive) {
+if ($argentInteractive) {
   if (Get-Command starship -ErrorAction SilentlyContinue) { Invoke-Expression (& starship init powershell) }
   if (Get-Command zoxide -ErrorAction SilentlyContinue) { Invoke-Expression (& { (zoxide init powershell | Out-String) }) }
 
@@ -22,9 +22,9 @@ if ($edithInteractive) {
   if (Get-Command lazygit -ErrorAction SilentlyContinue) { Set-Alias lg lazygit }
 
   # proj: pick any project under the profile's roots and jump there
-  if ((Get-Command edith -ErrorAction SilentlyContinue) -and (Get-Command fzf -ErrorAction SilentlyContinue)) {
+  if ((Get-Command argent -ErrorAction SilentlyContinue) -and (Get-Command fzf -ErrorAction SilentlyContinue)) {
     function proj {
-      $pick = edith projects --paths | fzf --height 40% --reverse --prompt 'project > ' --query "$args"
+      $pick = argent projects --paths | fzf --height 40% --reverse --prompt 'project > ' --query "$args"
       if ($pick) { Set-Location -LiteralPath $pick }
     }
   }
@@ -38,4 +38,4 @@ if ($edithInteractive) {
   # psreadline 2.1+ only; windows powershell ships 2.0
   try { Set-PSReadLineOption -ErrorAction Stop -Colors @{ InlinePrediction = '#6a758a' } } catch { }
 }
-Remove-Variable edithArgs, edithInteractive
+Remove-Variable argentArgs, argentInteractive

@@ -1,17 +1,17 @@
-"""edith doctor."""
+"""argent doctor."""
 
 import argparse
 from typing import Any
 
-from edith.doctor import Context, Finding, diagnose
-from edith.paths import Env
-from edith.ui import Out
+from argent.doctor import Context, Finding, diagnose
+from argent.paths import Env
+from argent.ui import Out
 
 ORDER = {"fail": 0, "warn": 1, "info": 2, "pass": 3}
 
 
 def register(sub: Any) -> None:
-    parser = sub.add_parser("doctor", help="check every claim edith makes about this machine")
+    parser = sub.add_parser("doctor", help="check every claim argent makes about this machine")
     parser.add_argument("--quiet", action="store_true", help="hide the checks that passed")
     parser.set_defaults(run=run)
 

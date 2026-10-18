@@ -15,9 +15,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from edith.paths import Env
-from edith.state import write_atomic
-from edith.tools import Release, Tool
+from argent.paths import Env
+from argent.state import write_atomic
+from argent.tools import Release, Tool
 
 ALREADY_INSTALLED = -1978335189  # winget's 0x8A15002B: nothing newer to install
 WINGET = [
@@ -118,7 +118,7 @@ def http_get(url: str) -> bytes:
         )
         if done.returncode == 0:
             return done.stdout
-    request = urllib.request.Request(url, headers={"User-Agent": "edith"})
+    request = urllib.request.Request(url, headers={"User-Agent": "argent"})
     with urllib.request.urlopen(request, timeout=120) as response:
         return response.read()
 

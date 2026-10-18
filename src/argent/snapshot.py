@@ -7,8 +7,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from edith.paths import Env
-from edith.state import State, write_atomic
+from argent.paths import Env
+from argent.state import State, write_atomic
 
 Clock = Callable[[], datetime]
 JOURNAL = "journal.json"
@@ -76,7 +76,7 @@ def restore(env: Env, name: str, clock: Clock) -> list[Path]:
     """Put every journaled file back as it was, and delete the ones that didn't exist."""
     journal = env.snapshots / name / JOURNAL
     if not journal.is_file():
-        raise UnknownSnapshotError(f"no snapshot named {name!r}; `edith restore` lists them")
+        raise UnknownSnapshotError(f"no snapshot named {name!r}; `argent restore` lists them")
     entries = json.loads(journal.read_text(encoding="utf-8"))["files"]
 
     undo = Snapshot.create(env, f"restore {name}", clock)

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from edith.projects import ago, find_projects, inspect, survey
+from argent.projects import ago, find_projects, inspect, survey
 
 pytestmark = pytest.mark.skipif(not shutil.which("git"), reason="needs git")
 

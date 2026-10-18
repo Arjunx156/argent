@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from edith.paths import Env
+from argent.paths import Env
 
 Which = Callable[[str, str], str | None]
 

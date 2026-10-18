@@ -1,6 +1,6 @@
 <#
-  Edith / setup
-  A fresh Windows laptop to Arjun's machine: uv, then edith itself, then the tools, then the kit.
+  Argent / setup
+  A fresh Windows laptop to Arjun's machine: uv, then argent itself, then the tools, then the kit.
   Safe to rerun. Runs on the Windows PowerShell 5.1 a new machine ships with.
 
   Usage:  powershell -ExecutionPolicy Bypass -File setup.ps1 [-Groups core,ai,docs]
@@ -30,17 +30,17 @@ if (Have 'uv') { Write-Host '  ok     uv' } else {
   Write-Host '  done   uv'
 }
 
-Write-Host "`n[2/4] edith"
+Write-Host "`n[2/4] argent"
 # editable, so a git pull in this folder is all an update needs
 uv tool install --editable $PSScriptRoot --reinstall --quiet
-if ($LASTEXITCODE -ne 0) { throw 'uv could not install edith from this folder.' }
+if ($LASTEXITCODE -ne 0) { throw 'uv could not install argent from this folder.' }
 Refresh-Path
-Write-Host ('  done   ' + (edith --version))
+Write-Host ('  done   ' + (argent --version))
 
 Write-Host "`n[3/4] tools"
-edith install @Groups
+argent install @Groups
 
 Write-Host "`n[4/4] kit"
-edith deploy
-edith doctor --quiet
+argent deploy
+argent doctor --quiet
 Write-Host "`nOpen a new terminal for the prompt, theme and PATH."

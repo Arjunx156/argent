@@ -1,4 +1,4 @@
-"""edith deploy, diff and restore."""
+"""argent deploy, diff and restore."""
 
 import argparse
 import difflib
@@ -7,14 +7,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from edith.deploy import Action, apply, plan
-from edith.kit import Kit, build_kit, pretty
-from edith.paths import Env
-from edith.profile import load_profile
-from edith.snapshot import list_snapshots, restore
-from edith.state import State
-from edith.tools import Detection, detect, load_manifest
-from edith.ui import DIM, MINT, RED, Out
+from argent.deploy import Action, apply, plan
+from argent.kit import Kit, build_kit, pretty
+from argent.paths import Env
+from argent.profile import load_profile
+from argent.snapshot import list_snapshots, restore
+from argent.state import State
+from argent.tools import Detection, detect, load_manifest
+from argent.ui import DIM, MINT, RED, Out
 
 ORDER = {"skip": 0, "drift": 1, "stray": 1, "remove": 2, "adopt": 3, "update": 4, "new": 5}
 
@@ -23,7 +23,7 @@ def register(sub: Any) -> None:
     deploy = sub.add_parser("deploy", help="put the kit in place, snapshotting first")
     deploy.add_argument("--dry-run", action="store_true", help="show the plan, write nothing")
     deploy.add_argument(
-        "--force", action="store_true", help="also overwrite files edited since edith wrote them"
+        "--force", action="store_true", help="also overwrite files edited since argent wrote them"
     )
     deploy.set_defaults(run=run_deploy)
 
@@ -66,7 +66,7 @@ def run_deploy(args: argparse.Namespace, env: Env, out: Out) -> int:
 
     if args.dry_run:
         out.line()
-        out.line(out.dim("dry run: nothing written. `edith diff` shows the lines."))
+        out.line(out.dim("dry run: nothing written. `argent diff` shows the lines."))
         return 0
 
     state = planned.state
@@ -78,13 +78,13 @@ def run_deploy(args: argparse.Namespace, env: Env, out: Out) -> int:
 
     out.line()
     if snapshot:
-        out.line(f"snapshot {snapshot.name}  {out.dim(f'undo: edith restore {snapshot.name}')}")
+        out.line(f"snapshot {snapshot.name}  {out.dim(f'undo: argent restore {snapshot.name}')}")
     else:
         out.line(out.dim("everything already in place"))
     drifted = [a for a in actions if a.kind in ("drift", "stray")]
     if drifted and not args.force:
         out.tag("warn", f"{len(drifted)} edited by hand and left alone")
-        out.line(out.dim("`edith diff` shows them; `edith deploy --force` overwrites them."))
+        out.line(out.dim("`argent diff` shows them; `argent deploy --force` overwrites them."))
         return 1
     return 0
 
@@ -96,7 +96,7 @@ def summarize(
     rows: dict[tuple[str, str], list[Action]] = {}
     for action in actions:
         folder = next((m for m in mirror if action.dest.is_relative_to(m)), None)
-        label = f"{pretty(env, folder)}/" if folder else action.label
+        label = f"{pretty(env, folder)}/" if folder else pretty(env, action.dest)
         rows.setdefault((action.kind, label), []).append(action)
     result: list[tuple[str, str, str, int]] = []
     for (kind, label), group in sorted(
@@ -138,13 +138,13 @@ def run_restore(args: argparse.Namespace, env: Env, out: Out) -> int:
     if not args.name:
         snapshots = list_snapshots(env)
         if not snapshots:
-            out.line(out.dim("no snapshots yet; edith takes one before every deploy"))
+            out.line(out.dim("no snapshots yet; argent takes one before every deploy"))
             return 0
         out.heading("snapshots")
         for snap in snapshots:
             out.tag("info", f"{snap.name}  {out.dim(f'{snap.reason}, {snap.count} files')}")
         out.line()
-        out.line(out.dim("put one back with `edith restore <name>`"))
+        out.line(out.dim("put one back with `argent restore <name>`"))
         return 0
     touched = restore(env, args.name, clock=datetime.now)
     out.heading(f"restored {args.name}")

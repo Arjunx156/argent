@@ -1,10 +1,10 @@
-"""profile.toml: who edith works for and where their projects live."""
+"""profile.toml: who argent works for and where their projects live."""
 
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
-from edith.paths import Env
+from argent.paths import Env
 
 
 class ProfileError(ValueError):
