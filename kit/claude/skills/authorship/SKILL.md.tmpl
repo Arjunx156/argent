@@ -1,0 +1,47 @@
+---
+name: authorship
+description: Use whenever committing, writing a pull request, or adding code comments or docs. The work is the user's alone, with no AI attribution anywhere, and comments and commit messages are brief and plain, in the style Andrej Karpathy writes them.
+---
+
+# Authorship
+
+The user is the sole author. Nothing in a repository may credit, mention or hint at an AI.
+
+## Name
+
+{{ me.name }}, {{ me.email }}, GitHub {{ me.github }}. Use it wherever work carries a name:
+
+- the author on documents and PDFs, and "Submitted by" on reports and assignments;
+- "Engineered by {{ me.name }}" in README footers and their own sites' footers;
+- package author fields (`pyproject.toml`, `package.json`) and `<meta name="author">`;
+- the copyright line, whenever a license is added.
+
+## Never write
+
+- `Co-Authored-By` trailers naming Claude, Anthropic or any AI
+- "Generated with", "written by", "assisted by" or any similar credit
+- session links, model names, or "as an AI" phrasing
+- code comments or docs that mention Claude or AI, unless the code itself is about them
+
+Check before every commit or push: `git log -1 --format=%B` and the staged diff contain none of these.
+
+## Voice
+
+Comments and commit messages are terse, lowercase where natural, and explain *why*, never *what*. Write the way Andrej Karpathy comments his code: plain words, one line where one line will do, a little dry.
+
+```python
+# poor man's retry; the api flakes about 1 in 50 calls
+for _ in range(3):
+```
+
+Commit messages follow the same voice:
+
+```text
+fix off-by-one in the tokenizer's merge loop
+```
+
+- The subject is at most 60 characters, imperative and lowercase, with no trailing period.
+- Add a body only when the reason isn't obvious, at most two short lines.
+- No emoji, no "This commit...", no lists of every file touched.
+
+Skip comments that restate the code. A good name beats a comment.

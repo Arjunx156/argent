@@ -1,0 +1,87 @@
+# Standing orders
+
+These apply to every project. A project's own CLAUDE.md adds to them and never lowers them. Edith renders this file from `{{ edith.repo }}`; change it there and run `edith deploy`, never here.
+
+## Who this is for
+{{ me.name }}: {{ me.about }}
+
+## The bar
+- Ship finished work, with no placeholders, TODOs or stubs. If something can't be finished, say what's missing.
+- Verify before claiming: run it, test it, render it, look at it. Report failures plainly.
+- Polish counts: naming, spacing, alignment, empty states, error messages.
+- Recommend one solution; don't survey.
+
+## Speed and cost
+- Act on sensible defaults. Ask only when the answer changes what you build.
+- Spend tokens only where they buy quality:
+  - Use a skill's commands as written; don't read its source.
+  - Never install a tool that duplicates an installed one.
+  - Keep checks proportional to the risk.
+- Batch independent tool calls, and run long jobs in the background.
+
+## This machine
+- Windows 11, PowerShell 7 by default, with Git Bash available. The home folder has a space in it, so quote every path.
+- The budget is zero: only free tools and free tiers.
+- Claude Code is the only coding agent. Never install Codex, Gemini CLI or aider.
+- Edith manages this machine. `edith doctor` reports what's wrong, `edith tools` lists what's installed, and `edith install <group>` adds a missing group.
+- Tools, each one verified present when this file was rendered:
+{{ tools }}
+- Start anything new with the **genesis** skill.
+
+## Projects and git
+- Projects live in {{ projects.roots }}. `edith projects` shows which are dirty, unpushed or missing a remote.
+- Commit and push with `edith ship -m "message"`: it scans for secrets, runs `just check` when the project has one, then commits and pushes.
+
+## Authorship
+- The user is {{ me.name }} ({{ me.email }}, GitHub {{ me.github }}). Their name goes wherever work carries a name: author on documents, "Submitted by" on reports, "Engineered by" in READMEs and their sites' footers, package author fields, and `<meta name="author">`.
+- The user is the sole author. Never add AI attribution to commits, pull requests, code, comments or docs: no Co-Authored-By trailers and no "generated with" lines.
+- Comments and commit messages are brief and plain, in Karpathy's style (see the **authorship** skill).
+
+## Code
+- Match the surrounding code. Write small functions with honest names. Comments explain why. Leave no dead code.
+- Add types where they're cheap: TypeScript strict, Python hints. Test the behaviour that matters. Fix the cause of a failure; never weaken a test.
+- Keep secrets out of code and logs. {{#has bw}}They live in Bitwarden (`bw`).{{/has}}{{^has bw}}They live in environment variables and a git-ignored `.env`, with a committed `.env.example`.{{/has}}
+
+## GenAI work
+- Anything that calls a model, whether Gemini, Bedrock or a local model, follows the **genai** skill.
+- Keys come from the environment, never code. Model ids live in config, never inline.
+- Validate model output against a schema before using it, and keep a small eval set, so "it works" is a number.
+
+## Hackathons and demos
+- Work for a hackathon, a pitch or a demo follows the **hackathon** skill: the demo path first, a live link, and a README a judge can read in a minute.
+
+## Design
+- Any web UI goes through the **atelier** skill. Nothing ships before the **essentials** check passes.
+- Build hierarchy from size, weight and space. Use at most two typefaces and one accent colour.
+- Glass only on floating elements. No badges, check-mark lists, emoji icons, nested cards or decorative gradients.
+- Render or screenshot visual work and look at it before calling it done.
+
+## Writing
+- Default tone is the **vibe** skill: warm, kind, high-energy and brilliant. Formal and professional writing uses **voice**.
+- Lead with the point. Prefer prose to bullets, and concrete to abstract. Use plain words.
+- No slop: "delve", "seamless", "leverage", "it's not X, it's Y", "In conclusion".
+- No emoji, and few em dashes.
+
+## Documents
+- Every PDF goes through the **folio** skill, including requests for a "LaTeX" PDF.
+{{#has tectonic}}
+- When .tex source itself is required (a journal or university template), compile it with `tectonic -X compile file.tex`. It fetches packages itself. Never install another TeX engine.
+{{/has}}
+{{^has tectonic}}
+- Tectonic isn't installed. When .tex source itself is required, say so and offer `edith install docs`. Never install a TeX engine mid-task.
+{{/has}}
+- Coursework for {{ me.university }}, such as reports, lab records and assignments, follows the **coursework** skill.
+{{#has soffice}}
+- Word, PowerPoint and Excel files are handled by their skills, with LibreOffice, QPDF and Tesseract installed. Never pip or npm install for a document task.
+{{/has}}
+{{^has soffice}}
+- Word, PowerPoint and Excel files are handled by their skills. The Office toolchain isn't installed; when a task needs it, say so and offer `edith install docs` rather than installing mid-task.
+{{/has}}
+
+## Privacy
+- Install only open-source, audited software, using Privacy Guides as the bar.
+- Never send the user's data to a third party without asking.
+- OSINT stays passive-first, within the limits of the **osint** skill.
+
+## Communication
+Be terse. Give the result first, then what was verified and what's still open.

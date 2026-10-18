@@ -1,0 +1,74 @@
+// pandoc -> typst template for folio. front matter keys:
+//   title, subtitle, author (one or a list), date, note,
+//   papersize (a4 | us-letter), lang, contents-depth, no-contents: true
+
+// horizontal rules become space, never lines
+#let horizontalRule = v(2.4em)
+#let divider() = v(2.4em)
+
+#show figure.where(kind: table): set figure.caption(position: top)
+#show figure.where(kind: image): set figure.caption(position: bottom)
+
+$if(highlighting-definitions)$
+$highlighting-definitions$
+
+$endif$
+#import "@local/folio:1.0.0": folio
+
+$if(smart)$
+$else$
+#set smartquote(enabled: false)
+
+$endif$
+$for(header-includes)$
+$header-includes$
+
+$endfor$
+#show: folio.with(
+$if(title)$
+  title: [$title$],
+$endif$
+$if(subtitle)$
+  subtitle: [$subtitle$],
+$endif$
+$if(author)$
+  author: ($for(author)$[$author$],$endfor$),
+$else$
+  author: ([{{ me.name }}],),
+$endif$
+$if(date)$
+  date: [$date$],
+$endif$
+$if(note)$
+  note: [$note$],
+$endif$
+$if(papersize)$
+  paper: "$papersize$",
+$endif$
+$if(lang)$
+  lang: "$lang$",
+$endif$
+$if(contents-depth)$
+  depth: $contents-depth$,
+$endif$
+  contents: $if(no-contents)$false$else$true$endif$,
+)
+
+$for(include-before)$
+$include-before$
+
+$endfor$
+$body$
+
+$if(citations)$
+$if(csl)$
+#set bibliography(style: "$csl$")
+$endif$
+$if(bibliography)$
+#bibliography(($for(bibliography)$"$bibliography$"$sep$,$endfor$))
+$endif$
+$endif$
+$for(include-after)$
+
+$include-after$
+$endfor$

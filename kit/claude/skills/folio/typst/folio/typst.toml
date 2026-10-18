@@ -1,0 +1,7 @@
+[package]
+name = "folio"
+version = "1.0.0"
+entrypoint = "lib.typ"
+authors = ["Ritesh Roshan"]
+license = "MIT"
+description = "Book-grade typesetting: white page, serif, generous air. No rules, no boxes."

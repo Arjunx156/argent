@@ -1,0 +1,37 @@
+---
+name: folio
+description: Make any PDF a person will read (report, essay, analysis, manual, notes), including requests for a "LaTeX" PDF: Typst gives LaTeX-grade output. {{#has tectonic}}Only when .tex source itself is required, use the installed `tectonic -X compile file.tex`.{{/has}}{{^has tectonic}}When .tex source itself is required, say Tectonic isn't installed yet and offer `edith install docs`.{{/has}} Never install a TeX engine. Not for editing existing PDFs.
+---
+
+# Folio
+
+Everything is installed and works. Do not read the template or scripts, and do not install anything.
+
+1. Write `doc.md`. `#` is a chapter (new page), `##` a section, `###` a subsection; `# Preface {.unnumbered}` has no number.
+
+   ```markdown
+   ---
+   title: Title
+   subtitle: Optional
+   author: {{ me.name }}   # the default; change only if the user names someone else
+   date: October 2026
+   ---
+
+   # First chapter
+
+   Prose.
+   ```
+
+2. Build. It lints the prose, then typesets:
+   `python ~/.claude/skills/folio/scripts/folio.py build doc.md --sheet sheet.png`
+   If it reports prose errors, rewrite those sentences and build again.
+
+3. Read `sheet.png` once. It shows every page on one image. Fix only what is visibly wrong: a near-empty page, a split table, a stranded heading. To inspect one page closely, add `--png pages` and read only that page.
+
+4. Reply with the PDF path.
+
+The output is a white A4 page in EB Garamond, with a title page, contents, and chapters on new pages, and no lines, boxes or fills. Don't add any.
+
+Write prose in paragraphs, concretely, with no filler, no emoji, no "**Label**:" bullets and few em dashes. Code lines stay within 64 characters. Use tables only for real data, with at most five columns.
+
+To write Typst instead, start with `#import "@local/folio:1.0.0": folio` and `#show: folio.with(title: [Title], author: "Name")`, then build the `.typ` the same way.
