@@ -520,3 +520,66 @@ cmd = "yt-dlp"
 group = "osint"
 uv = "yt-dlp"
 about = "Downloads video and its metadata from over a thousand sites."
+
+[[tool]]
+cmd = "socialscan"
+group = "osint"
+uv = "socialscan"
+about = "Checks whether a username or email is taken on major platforms."
+
+[[tool]]
+cmd = "theHarvester"
+group = "osint"
+uv = "git+https://github.com/laramies/theHarvester"
+uv_python = "3.14"
+about = "Collects emails, subdomains and hosts for a domain from public sources."
+
+[[tool]]
+cmd = "subfinder"
+group = "osint"
+release = { repo = "projectdiscovery/subfinder", asset = "*windows_amd64.zip", exe = "subfinder.exe" }
+about = "Finds a domain's subdomains passively from dozens of public sources."
+
+[[tool]]
+cmd = "dnsx"
+group = "osint"
+release = { repo = "projectdiscovery/dnsx", asset = "*windows_amd64.zip", exe = "dnsx.exe" }
+about = "Resolves thousands of hostnames fast and keeps the ones that answer."
+
+[[tool]]
+cmd = "httpx-toolkit"
+group = "osint"
+release = { repo = "projectdiscovery/httpx", asset = "*windows_amd64.zip", exe = "httpx.exe" }
+about = "Probes hosts for live web servers; named httpx-toolkit because Python's httpx owns httpx. Active: only on systems you may test."
+
+[[tool]]
+cmd = "amass"
+group = "osint"
+winget = "OWASP.Amass"
+about = "OWASP's mapper of a domain's subdomains, networks and how they connect."
+
+[[tool]]
+cmd = "shodan"
+group = "osint"
+uv = "shodan"
+# shodan 1.31 still imports pkg_resources, which uv's clean tool envs don't carry
+uv_with = ["setuptools<80"]
+about = "Searches Shodan's index of internet-facing services; a free account gives the key."
+
+[[tool]]
+cmd = "censys"
+group = "osint"
+uv = "censys"
+about = "Searches certificates and hosts across the internet, with a free account key."
+
+[[tool]]
+cmd = "gallery-dl"
+group = "osint"
+uv = "gallery-dl"
+about = "Archives images and posts from public galleries and profiles."
+
+[[tool]]
+cmd = "spiderfoot"
+group = "osint"
+docker = { image = "spiderfoot", build = "https://github.com/smicallef/spiderfoot.git" }
+about = "Hundreds of automated modules from one starting point, in a local container; `spiderfoot` opens it."

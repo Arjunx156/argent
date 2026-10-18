@@ -41,6 +41,7 @@ class Tool:
     winget: str | None = None
     uv: str | None = None
     uv_with: tuple[str, ...] = ()
+    uv_python: str | None = None
     release: Release | None = None
     pylib: str | None = None
     module: str | None = None
@@ -169,6 +170,7 @@ def _tool(raw: dict[str, Any], groups: dict[str, str], areas: set[str]) -> Tool:
         winget=raw.get("winget"),
         uv=raw.get("uv"),
         uv_with=tuple(raw.get("uv_with", ())),
+        uv_python=raw.get("uv_python"),
         release=Release(**release) if release else None,
         pylib=raw.get("pylib"),
         module=raw.get("module"),

@@ -65,6 +65,8 @@ def steps_for(tool: Tool, places: Places | None = None) -> list[Step]:
         return [Step(argv, (0, ALREADY_INSTALLED))]
     if tool.uv:
         extra = [arg for dep in tool.uv_with for arg in ("--with", dep)]
+        if tool.uv_python:
+            extra = ["--python", tool.uv_python, *extra]
         steps = [Step(("uv", "tool", "install", "--quiet", *extra, tool.uv))]
         if tool.after:
             steps.append(Step(tool.after))
@@ -106,6 +108,8 @@ def install(
         bin_dir = env.home / ".local" / "bin"
         install_release(tool.release, bin_dir / f"{tool.cmd}.exe", fetch or http_get)
         return
+    if tool.docker and run(["docker", "info"]) != 0:
+        raise InstallError("Docker Desktop isn't running; start it, then install this again")
     for step in steps_for(tool, places):
         code = run(list(step.argv))
         if code not in step.ok_codes:

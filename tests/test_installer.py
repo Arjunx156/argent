@@ -130,3 +130,40 @@ def test_node_libraries_install_into_the_argent_prefix_and_node_path(
     assert ran[0][:4] == ["npm", "install", "--prefix", str(env.state / "node")]
     assert ran[0][-1] == "pptxgenjs"
     assert remembered == [("NODE_PATH", env.state / "node" / "node_modules")]
+
+
+def test_uv_tools_can_pin_a_python() -> None:
+    [step] = steps_for(MANIFEST.get("theHarvester"))
+    assert step.argv[:5] == ("uv", "tool", "install", "--quiet", "--python")
+    assert step.argv[5] == "3.14"
+    assert step.argv[-1].startswith("git+https://github.com/laramies/theHarvester")
+
+
+def test_releases_install_under_the_tools_own_name(env: Env) -> None:
+    archive = zipped("httpx.exe", b"MZ httpx")
+    meta = {
+        "tag_name": "v1",
+        "assets": [
+            {
+                "name": "httpx_1_windows_amd64.zip",
+                "browser_download_url": "u/zip",
+                "digest": digest(archive),
+            }
+        ],
+    }
+    pages = {
+        "https://api.github.com/repos/projectdiscovery/httpx/releases/latest": json.dumps(
+            meta
+        ).encode(),
+        "u/zip": archive,
+    }
+    install(MANIFEST.get("httpx-toolkit"), env, fetch=pages.__getitem__)
+    assert (env.home / ".local" / "bin" / "httpx-toolkit.exe").read_bytes() == b"MZ httpx"
+
+
+def test_docker_images_explain_a_stopped_docker(env: Env) -> None:
+    def docker_down(argv: list[str]) -> int:
+        return 1 if argv[:2] == ["docker", "info"] else 0
+
+    with pytest.raises(InstallError, match="Docker Desktop isn't running"):
+        install(MANIFEST.get("spiderfoot"), env, run=docker_down)

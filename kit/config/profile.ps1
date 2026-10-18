@@ -20,6 +20,14 @@ if ($argentInteractive) {
   }
   if (Get-Command bat -ErrorAction SilentlyContinue) { function b { bat --style=plain @args } }
   if (Get-Command lazygit -ErrorAction SilentlyContinue) { Set-Alias lg lazygit }
+  if (Get-Command docker -ErrorAction SilentlyContinue) {
+    # spiderfoot in its container, listening on this machine only
+    function spiderfoot {
+      docker start spiderfoot *> $null
+      if ($LASTEXITCODE -ne 0) { docker run -d --name spiderfoot -p 127.0.0.1:5001:5001 spiderfoot | Out-Null }
+      Start-Process 'http://127.0.0.1:5001'
+    }
+  }
 
   # proj: pick any project under the profile's roots and jump there
   if ((Get-Command argent -ErrorAction SilentlyContinue) -and (Get-Command fzf -ErrorAction SilentlyContinue)) {
