@@ -16,6 +16,8 @@ class Env:
     appdata: Path
     localappdata: Path
     documents: Path
+    programfiles: Path
+    windir: Path
     repo: Path
 
     @classmethod
@@ -26,6 +28,8 @@ class Env:
             appdata=Path(os.environ.get("APPDATA") or home / "AppData" / "Roaming"),
             localappdata=Path(os.environ.get("LOCALAPPDATA") or home / "AppData" / "Local"),
             documents=documents_folder(home),
+            programfiles=Path(os.environ.get("PROGRAMFILES") or "C:/Program Files"),
+            windir=Path(os.environ.get("WINDIR") or "C:/Windows"),
             repo=repo or find_repo(),
         )
 

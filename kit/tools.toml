@@ -1,0 +1,406 @@
+# The tool manifest. One entry per tool: where it comes from, how edith finds it,
+# and the phrase the standing orders may use for it. A claim only renders when the
+# tool is detected, so Claude is never told about a tool this machine lacks.
+#
+# Sources: winget = "<id>", uv = "<package>" (uv tool install), or
+# release = { repo, asset, exe } for a GitHub release verified by its sha256 digest.
+# probes are extra files that count as installed, for tools that live off PATH.
+
+[groups]
+core = "Search, data, build, git, Python and JavaScript, the prompt and the font"
+ai = "Local models, AWS Bedrock and serverless deploys, containers"
+docs = "LaTeX, Office conversion, PDF repair, OCR and document-to-Markdown"
+web = "Screenshots and font subsetting for checking web work"
+privacy = "The password manager CLI and the Sysinternals suite"
+osint = "Public-source investigation: accounts, domains, media"
+
+# areas render in this order inside the standing orders
+[[area]]
+name = "Search"
+
+[[area]]
+name = "Data and text"
+
+[[area]]
+name = "Python"
+note = "never global pip"
+
+[[area]]
+name = "JavaScript and TypeScript"
+note = "run tools with `bun x`, not `bunx`"
+
+[[area]]
+name = "Tasks and speed"
+
+[[area]]
+name = "Git"
+
+[[area]]
+name = "GenAI and cloud"
+
+[[area]]
+name = "Checking web work"
+
+# core
+
+[[tool]]
+cmd = "rg"
+group = "core"
+winget = "BurntSushi.ripgrep.MSVC"
+area = "Search"
+claim = "`rg` for text"
+about = "Searches every file in a project in milliseconds and skips what .gitignore excludes."
+
+[[tool]]
+cmd = "fd"
+group = "core"
+winget = "sharkdp.fd"
+area = "Search"
+claim = "`fd` for files"
+about = "Finds files by name with simple syntax, respecting .gitignore."
+
+[[tool]]
+cmd = "fzf"
+group = "core"
+winget = "junegunn.fzf"
+about = "Filters any list as you type: files, branches, history."
+
+[[tool]]
+cmd = "bat"
+group = "core"
+winget = "sharkdp.bat"
+about = "Prints files with syntax highlighting; `b` in an interactive shell."
+
+[[tool]]
+cmd = "eza"
+group = "core"
+winget = "eza-community.eza"
+about = "A readable listing with folders first and git status; `ls`, `ll` and `lt`."
+
+[[tool]]
+cmd = "zoxide"
+group = "core"
+winget = "ajeetdsouza.zoxide"
+about = "Jumps to frequent folders from a fragment of the name: `z edith`."
+
+[[tool]]
+cmd = "ast-grep"
+group = "core"
+uv = "ast-grep-cli"
+area = "Data and text"
+claim = "`ast-grep` for structural refactors"
+about = "Searches and rewrites code by syntax tree, so a rename hits every call site."
+
+[[tool]]
+cmd = "jq"
+group = "core"
+winget = "jqlang.jq"
+area = "Data and text"
+claim = "`jq` for JSON"
+about = "Queries and reshapes JSON in one line."
+
+[[tool]]
+cmd = "yq"
+group = "core"
+winget = "MikeFarah.yq"
+area = "Data and text"
+claim = "`yq` for YAML and TOML"
+about = "Edits YAML, TOML and XML in place without breaking their structure."
+
+[[tool]]
+cmd = "sd"
+group = "core"
+winget = "chmln.sd"
+area = "Data and text"
+claim = "`sd` for find and replace"
+about = "Find and replace across files with ordinary regular expressions."
+
+[[tool]]
+cmd = "dust"
+group = "core"
+winget = "bootandy.dust"
+about = "Shows which folders eat the disk, as a sorted tree."
+
+[[tool]]
+cmd = "glow"
+group = "core"
+winget = "charmbracelet.glow"
+about = "Renders Markdown in the terminal."
+
+[[tool]]
+cmd = "uv"
+group = "core"
+winget = "astral-sh.uv"
+area = "Python"
+claim = "`uv` for Pythons, environments and tools"
+about = "Installs Python versions, dependencies and CLI tools, each isolated, in seconds."
+
+[[tool]]
+cmd = "ruff"
+group = "core"
+uv = "ruff"
+area = "Python"
+claim = "`ruff` to lint and format"
+about = "Lints and formats Python in milliseconds; replaces flake8, black and isort."
+
+[[tool]]
+cmd = "bun"
+group = "core"
+winget = "Oven-sh.Bun"
+area = "JavaScript and TypeScript"
+claim = "`bun` to install, run and test"
+about = "JavaScript runtime, package manager, test runner and bundler in one binary."
+
+[[tool]]
+cmd = "biome"
+group = "core"
+winget = "BiomeJS.Biome"
+area = "JavaScript and TypeScript"
+claim = "`biome` to lint and format"
+about = "Lints and formats JavaScript, TypeScript and JSON; replaces ESLint and Prettier."
+
+[[tool]]
+cmd = "fnm"
+group = "core"
+winget = "Schniz.fnm"
+about = "Switches Node to whatever version a project asks for."
+
+[[tool]]
+cmd = "just"
+group = "core"
+winget = "Casey.Just"
+area = "Tasks and speed"
+claim = "`just` as the task runner"
+about = "Runs named project commands from a justfile: `just dev`, `just check`."
+
+[[tool]]
+cmd = "hyperfine"
+group = "core"
+winget = "sharkdp.hyperfine"
+area = "Tasks and speed"
+claim = "`hyperfine` before any speed claim"
+about = "Benchmarks commands until the timings settle, so speed claims come with proof."
+
+[[tool]]
+cmd = "tokei"
+group = "core"
+winget = "XAMPPRocky.Tokei"
+about = "Counts lines of code by language; sizes up a codebase in seconds."
+
+[[tool]]
+cmd = "gh"
+group = "core"
+winget = "GitHub.cli"
+area = "Git"
+claim = "`gh` for GitHub"
+about = "Pull requests, issues, releases and workflow runs from the terminal."
+
+[[tool]]
+cmd = "delta"
+group = "core"
+winget = "dandavison.delta"
+area = "Git"
+claim = "`delta` for diffs"
+about = "Syntax-highlighted git diffs with line numbers."
+
+[[tool]]
+cmd = "lazygit"
+group = "core"
+winget = "JesseDuffield.lazygit"
+area = "Git"
+claim = "`lazygit`"
+about = "A full git interface in the terminal; `lg` opens it."
+
+[[tool]]
+cmd = "gitleaks"
+group = "core"
+winget = "Gitleaks.Gitleaks"
+area = "Git"
+claim = "`gitleaks` before every push"
+about = "Finds passwords, tokens and keys before they reach GitHub."
+
+[[tool]]
+cmd = "starship"
+group = "core"
+winget = "Starship.Starship"
+about = "Draws the prompt: folder, branch and state, language version, slow-command timer."
+
+[[tool]]
+cmd = "pwsh"
+group = "core"
+winget = "Microsoft.PowerShell"
+about = "PowerShell 7, the default shell in the terminal and the editor."
+
+[[tool]]
+cmd = "typst"
+group = "core"
+winget = "Typst.Typst"
+about = "The typesetting engine behind folio; source to finished PDF in about a second."
+
+[[tool]]
+cmd = "pandoc"
+group = "core"
+winget = "JohnMacFarlane.Pandoc"
+about = "Converts between Markdown, Word, HTML, Typst and dozens more."
+
+[[tool]]
+cmd = "pdftoppm"
+group = "core"
+winget = "oschwartz10612.Poppler"
+about = "Poppler's PDF tools: render pages to images, list fonts, read metadata."
+
+[[tool]]
+cmd = "JetBrainsMono Nerd Font"
+group = "core"
+winget = "DEVCOM.JetBrainsMonoNerdFont"
+probes = [
+  "{localappdata}/Microsoft/Windows/Fonts/JetBrainsMonoNerdFont-Regular.ttf",
+  "{windir}/Fonts/JetBrainsMonoNerdFont-Regular.ttf",
+]
+about = "The coding face in the terminal and editor, with the glyphs the prompt draws."
+
+# ai
+
+[[tool]]
+cmd = "ollama"
+group = "ai"
+winget = "Ollama.Ollama"
+area = "GenAI and cloud"
+claim = "`ollama` for local models"
+about = "Runs open models locally with an OpenAI-compatible API on port 11434."
+
+[[tool]]
+cmd = "aws"
+group = "ai"
+winget = "Amazon.AWSCLI"
+area = "GenAI and cloud"
+claim = "`aws` for Bedrock and the rest of AWS"
+about = "The AWS command line: Bedrock model access, S3, IAM, logs."
+
+[[tool]]
+cmd = "sam"
+group = "ai"
+winget = "Amazon.SAM-CLI"
+area = "GenAI and cloud"
+claim = "`sam` to build and deploy serverless stacks"
+about = "Builds, runs locally and deploys Lambda and API Gateway stacks."
+
+[[tool]]
+cmd = "docker"
+group = "ai"
+winget = "Docker.DockerDesktop"
+area = "GenAI and cloud"
+claim = "`docker` for containers"
+about = "Runs services in sealed containers: vector stores, databases, SpiderFoot."
+
+# docs
+
+[[tool]]
+cmd = "tectonic"
+group = "docs"
+release = { repo = "tectonic-typesetting/tectonic", asset = "*x86_64-pc-windows-msvc.zip", exe = "tectonic.exe" }
+about = "A whole LaTeX engine in one file that fetches only the packages a document uses."
+
+[[tool]]
+cmd = "soffice"
+group = "docs"
+winget = "TheDocumentFoundation.LibreOffice"
+probes = ["{programfiles}/LibreOffice/program/soffice.exe"]
+about = "LibreOffice, headless: renders and converts Word, PowerPoint and Excel files."
+
+[[tool]]
+cmd = "qpdf"
+group = "docs"
+winget = "QPDF.QPDF"
+about = "Checks, repairs, merges and splits PDFs without touching their content."
+
+[[tool]]
+cmd = "tesseract"
+group = "docs"
+winget = "UB-Mannheim.TesseractOCR"
+probes = ["{programfiles}/Tesseract-OCR/tesseract.exe"]
+about = "Reads text out of scans and images."
+
+[[tool]]
+cmd = "markitdown"
+group = "docs"
+uv = "markitdown[docx,pptx,xlsx,pdf]"
+about = "Turns Word, PowerPoint, Excel and PDF files into clean Markdown."
+
+# web
+
+[[tool]]
+cmd = "playwright"
+group = "web"
+uv = "playwright"
+after = ["playwright", "install", "chromium"]
+area = "Checking web work"
+claim = "`playwright screenshot --full-page <url> <file>` to look at a page"
+about = "Drives a real Chromium for screenshots and click-through checks."
+
+[[tool]]
+cmd = "pyftsubset"
+group = "web"
+uv = "fonttools"
+uv_with = ["brotli"]
+area = "Checking web work"
+claim = "`pyftsubset` to cut fonts down to WOFF2"
+about = "Subsets a font to the characters a site uses, so pages show their face without waiting."
+
+# privacy
+
+[[tool]]
+cmd = "bw"
+group = "privacy"
+winget = "Bitwarden.CLI"
+about = "Bitwarden from the terminal, so secrets never sit in code or dotfiles."
+
+[[tool]]
+cmd = "autoruns"
+group = "privacy"
+winget = "Microsoft.Sysinternals.Suite"
+about = "Sysinternals: autoruns, procexp, tcpview and sigcheck show what the machine is doing."
+
+# osint
+
+[[tool]]
+cmd = "sherlock"
+group = "osint"
+uv = "sherlock-project"
+about = "Checks hundreds of sites for a username."
+
+[[tool]]
+cmd = "maigret"
+group = "osint"
+uv = "maigret"
+about = "A deeper username search that writes an HTML or PDF report."
+
+[[tool]]
+cmd = "holehe"
+group = "osint"
+uv = "holehe"
+about = "Finds which services an email is registered with, for auditing your own exposure."
+
+[[tool]]
+cmd = "dnstwist"
+group = "osint"
+uv = "dnstwist"
+about = "Generates look-alike domains and checks which are registered."
+
+[[tool]]
+cmd = "exiftool"
+group = "osint"
+winget = "OliverBetz.ExifTool"
+about = "Reads and edits metadata in photos, PDFs and documents."
+
+[[tool]]
+cmd = "ffmpeg"
+group = "osint"
+winget = "Gyan.FFmpeg"
+about = "Converts, cuts and inspects audio and video; also cuts demo videos."
+
+[[tool]]
+cmd = "yt-dlp"
+group = "osint"
+uv = "yt-dlp"
+about = "Downloads video and its metadata from over a thousand sites."

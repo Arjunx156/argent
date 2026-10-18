@@ -30,6 +30,8 @@ def env(tmp_path: Path) -> Env:
         appdata=home / "AppData" / "Roaming",
         localappdata=home / "AppData" / "Local",
         documents=home / "Documents",
+        programfiles=tmp_path / "Program Files",
+        windir=tmp_path / "Windows",
         repo=repo,
     )
     for folder in (fake.appdata, fake.localappdata, fake.documents, fake.kit):

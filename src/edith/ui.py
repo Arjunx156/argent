@@ -26,6 +26,7 @@ TAG_COLOURS = {
     "info": DIM,
     "pass": MINT,
     "fail": RED,
+    "miss": GOLD,
     "get": CYAN,
 }
 
