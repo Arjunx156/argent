@@ -1,0 +1,19 @@
+# Who edith works for. Templates read this; nothing else hardcodes it.
+
+[me]
+name = "Arjun Krishnan"
+email = "harisuresh886@gmail.com"
+github = "Arjunx156"
+about = "AI student at Amrita Vishwa Vidyapeetham who builds GenAI apps (agents, RAG and local LLMs) in Python and TypeScript, on Gemini, AWS Bedrock and Ollama, and ships most of them at hackathons."
+university = "Amrita Vishwa Vidyapeetham"
+
+[projects]
+# where `edith projects` looks for repositories, two levels deep
+roots = [
+  "~/Desktop/Desktop/personal projects",
+  "D:/Personal projects2.0",
+]
+
+[claude]
+# a soft chime when a turn ends, another when Claude needs you
+chimes = true
