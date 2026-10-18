@@ -8,12 +8,14 @@ from edith import __version__
 from edith.commands import (
     deploy_cmd,
     doctor_cmd,
+    install_cmd,
     projects_cmd,
     shelve_cmd,
     ship_cmd,
     tools_cmd,
 )
 from edith.commands.shelve_cmd import ShelfError
+from edith.installer import InstallError
 from edith.paths import Env, RepoNotFoundError
 from edith.profile import ProfileError
 from edith.render import TemplateError
@@ -31,6 +33,7 @@ EXPECTED = (
     UnknownSnapshotError,
     ShelfError,
     ShipError,
+    InstallError,
 )
 
 
@@ -41,7 +44,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"edith {__version__}")
     sub = parser.add_subparsers(title="commands", metavar="<command>")
-    for module in (doctor_cmd, deploy_cmd, ship_cmd, projects_cmd, tools_cmd, shelve_cmd):
+    modules = (doctor_cmd, deploy_cmd, ship_cmd, projects_cmd, tools_cmd, install_cmd, shelve_cmd)
+    for module in modules:
         module.register(sub)
     return parser
 
