@@ -11,7 +11,7 @@ Argent rebuilds and audits this machine. Its source is `{{ argent.repo }}`, and 
 |---|---|
 | `argent doctor` | Checks every claim: tools, standing orders, status line, git identity, PATH, stray rules and skills, projects. Exit 1 on any failure |
 | `argent tools [group] [--missing]` | What the manifest lists and what's installed |
-| `argent install <group>` | Installs a group's missing tools: winget, `uv tool`, or a digest-checked GitHub release |
+| `argent install <group or tool>` | Installs what is missing: winget, `uv tool`, a digest-checked GitHub release, the Python and Node libraries the document skills import, or a Docker image |
 | `argent deploy [--dry-run]` | Renders the kit into place behind a snapshot. Exit 1 means some files were edited by hand and left alone |
 | `argent diff [text]` | The exact lines deploy would change |
 | `argent restore [name]` | Lists snapshots, or puts one back; restoring takes its own snapshot |

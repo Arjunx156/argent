@@ -11,7 +11,7 @@ from argent.merge import claude_settings, editor_settings, managed_block, termin
 from argent.paths import Env
 from argent.profile import Profile
 from argent.render import render, tools_block
-from argent.tools import Detection, Manifest
+from argent.tools import Detection, Manifest, satisfied
 
 TEMPLATE = ".tmpl"
 FOLIO_VERSION = "1.0.0"
@@ -40,7 +40,8 @@ def build_kit(env: Env, profile: Profile, manifest: Manifest, found: Detection) 
         if src.name.endswith(TEMPLATE):
             text = src.read_text(encoding="utf-8")
             name = src.relative_to(env.kit).as_posix()
-            content = render(text, context, found.has, name).encode("utf-8")
+            has = partial(satisfied, manifest, found)
+            content = render(text, context, has, name).encode("utf-8")
             dest = dest.with_name(dest.name.removesuffix(TEMPLATE))
         else:
             content = src.read_bytes()

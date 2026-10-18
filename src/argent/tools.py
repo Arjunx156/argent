@@ -1,16 +1,13 @@
 """The tool manifest, and what of it this machine actually has."""
 
-import os
-import sys
 import tomllib
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from argent.paths import Env
-
-Which = Callable[[str, str], str | None]
+from argent.probe import Probe
 
 
 class ManifestError(ValueError):
@@ -22,6 +19,12 @@ class Release:
     repo: str
     asset: str
     exe: str
+
+
+@dataclass(frozen=True)
+class Docker:
+    image: str
+    build: str
 
 
 @dataclass(frozen=True)
@@ -39,6 +42,10 @@ class Tool:
     uv: str | None = None
     uv_with: tuple[str, ...] = ()
     release: Release | None = None
+    pylib: str | None = None
+    module: str | None = None
+    nodelib: str | None = None
+    docker: Docker | None = None
     probes: tuple[str, ...] = ()
     after: tuple[str, ...] = ()
     area: str | None = None
@@ -52,6 +59,12 @@ class Tool:
             return f"uv tool {self.uv}"
         if self.release:
             return f"release {self.release.repo}"
+        if self.pylib:
+            return f"uv pip {self.pylib} (user site)"
+        if self.nodelib:
+            return f"npm {self.nodelib}"
+        if self.docker:
+            return f"docker build {self.docker.image}"
         return "manual"
 
 
@@ -75,6 +88,21 @@ class Manifest:
             raise ManifestError(f"no such group: {', '.join(unknown)} (known: {known})")
         return [t for t in self.tools if t.group in wanted]
 
+    def select(self, names: Iterable[str]) -> list[Tool]:
+        """Groups or single tools, in manifest order, each tool once."""
+        wanted: set[str] = set()
+        for name in names:
+            if name in self.groups:
+                wanted |= {t.cmd for t in self.in_groups([name])}
+            elif any(t.cmd == name for t in self.tools):
+                wanted.add(name)
+            else:
+                known = ", ".join(self.groups)
+                raise ManifestError(
+                    f"{name} is neither a group ({known}) nor a tool in the manifest"
+                )
+        return [t for t in self.tools if t.cmd in wanted]
+
 
 @dataclass(frozen=True)
 class Detection:
@@ -88,6 +116,7 @@ class Detection:
 
 
 TOOL_KEYS = {f.name for f in Tool.__dataclass_fields__.values()}
+SOURCES = ("winget", "uv", "release", "pylib", "nodelib", "docker")
 
 
 def load_manifest(path: Path) -> Manifest:
@@ -124,9 +153,11 @@ def _tool(raw: dict[str, Any], groups: dict[str, str], areas: set[str]) -> Tool:
         raise ManifestError(f"{cmd}: claim and area go together")
     if raw.get("area") and raw["area"] not in areas:
         raise ManifestError(f"{cmd}: area {raw['area']!r} isn't declared")
-    sources = [k for k in ("winget", "uv", "release") if raw.get(k)]
+    sources = [k for k in SOURCES if raw.get(k)]
     if len(sources) != 1:
-        raise ManifestError(f"{cmd}: needs exactly one of winget, uv or release")
+        raise ManifestError(f"{cmd}: needs exactly one of {', '.join(SOURCES)}")
+    if bool(raw.get("pylib")) != bool(raw.get("module")):
+        raise ManifestError(f"{cmd}: pylib and module go together")
 
     release = raw.get("release")
     if release and not str(release.get("asset", "")).endswith(".zip"):
@@ -139,6 +170,10 @@ def _tool(raw: dict[str, Any], groups: dict[str, str], areas: set[str]) -> Tool:
         uv=raw.get("uv"),
         uv_with=tuple(raw.get("uv_with", ())),
         release=Release(**release) if release else None,
+        pylib=raw.get("pylib"),
+        module=raw.get("module"),
+        nodelib=raw.get("nodelib"),
+        docker=Docker(**raw["docker"]) if raw.get("docker") else None,
         probes=tuple(raw.get("probes", ())),
         after=tuple(raw.get("after", ())),
         area=raw.get("area"),
@@ -146,68 +181,17 @@ def _tool(raw: dict[str, Any], groups: dict[str, str], areas: set[str]) -> Tool:
     )
 
 
-def search_path(env: Env) -> str:
-    """PATH as a fresh shell would see it, so tools installed a minute ago count."""
-    parts = os.environ.get("PATH", "").split(os.pathsep)
-    parts += _registry_path()
-    parts += [
-        str(env.home / ".local" / "bin"),
-        str(env.localappdata / "Microsoft" / "WinGet" / "Links"),
-    ]
-    unique = dict.fromkeys(p for p in parts if p)
-    return os.pathsep.join(unique)
+def satisfied(manifest: Manifest, found: Detection, name: str) -> bool:
+    """A tool by name, or `group:<name>` for every tool in a group."""
+    if name.startswith("group:"):
+        return all(found.has(t.cmd) for t in manifest.in_groups([name.removeprefix("group:")]))
+    return found.has(name)
 
 
-def _registry_path() -> list[str]:
-    if sys.platform != "win32":
-        return []
-    import winreg
-
-    keys = [
-        (winreg.HKEY_CURRENT_USER, "Environment"),
-        (
-            winreg.HKEY_LOCAL_MACHINE,
-            r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment",
-        ),
-    ]
-    found: list[str] = []
-    for hive, sub in keys:
-        try:
-            with winreg.OpenKey(hive, sub) as key:
-                value, _ = winreg.QueryValueEx(key, "Path")
-        except OSError:
-            continue
-        found += [os.path.expandvars(p) for p in str(value).split(";")]
-    return found
-
-
-class PathIndex:
-    """Every file on PATH, listed once. shutil.which stats each folder for every suffix of
-    every tool, thousands of calls for the manifest; this is one scandir per folder."""
-
-    def __init__(self, path: str) -> None:
-        self.names: dict[str, str] = {}
-        for folder in path.split(os.pathsep):
-            try:
-                entries = list(os.scandir(folder))
-            except OSError:
-                continue
-            for entry in entries:
-                self.names.setdefault(_fold(entry.name), entry.path)
-
-    def find(self, cmd: str, _path: str = "") -> str | None:
-        if sys.platform != "win32":
-            hit = self.names.get(cmd)
-            return hit if hit and os.access(hit, os.X_OK) else None
-        suffixes = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").lower().split(";")
-        candidates = ("", *suffixes) if Path(cmd).suffix else suffixes
-        return next(
-            (self.names[k] for s in candidates if (k := _fold(cmd + s)) in self.names), None
-        )
-
-
-def _fold(name: str) -> str:
-    return name.lower() if sys.platform == "win32" else name
+def expand(manifest: Manifest, name: str) -> set[str]:
+    if name.startswith("group:"):
+        return {t.cmd for t in manifest.in_groups([name.removeprefix("group:")])}
+    return {name}
 
 
 def probe_path(raw: str, env: Env) -> Path:
@@ -222,16 +206,29 @@ def probe_path(raw: str, env: Env) -> Path:
     )
 
 
-def detect(tools: Iterable[Tool], env: Env, which: Which | None = None) -> Detection:
-    path = search_path(env)
-    if which is None:
-        which = PathIndex(path).find
+def detect(tools: Iterable[Tool], env: Env, probe: Probe | None = None) -> Detection:
+    probe = probe or Probe(env)
+    tools = list(tools)
+    modules = probe.python_modules([t.module for t in tools if t.pylib and t.module])
     found: dict[str, str] = {}
     for tool in tools:
-        hit = which(tool.cmd, path)
-        if not hit:
-            probes = (probe_path(raw, env) for raw in tool.probes)
-            hit = next((str(p) for p in probes if p.exists()), None)
+        hit = _find(tool, env, probe, modules)
         if hit:
             found[tool.cmd] = hit
     return Detection(found)
+
+
+def _find(tool: Tool, env: Env, probe: Probe, modules: dict[str, str]) -> str | None:
+    if tool.pylib:
+        return modules.get(tool.module or "")
+    if tool.nodelib:
+        package = (d / tool.nodelib for d in probe.node_dirs)
+        return next((str(p) for p in package if (p / "package.json").is_file()), None)
+    if tool.docker:
+        image = tool.docker.image
+        return f"docker image {image}" if probe.docker_image(image) else None
+    hit = probe.which(tool.cmd)
+    if hit:
+        return hit
+    probes = (probe_path(raw, env) for raw in tool.probes)
+    return next((str(p) for p in probes if p.exists()), None)

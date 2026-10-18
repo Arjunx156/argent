@@ -9,7 +9,7 @@
 [groups]
 core = "Search, data, build, git, Python and JavaScript, the prompt and the font"
 ai = "Local models, AWS Bedrock and serverless deploys, containers"
-docs = "LaTeX, Office conversion, PDF repair, OCR and document-to-Markdown"
+docs = "LaTeX, Office conversion, PDF repair, OCR, and the libraries the document skills import"
 web = "Screenshots and font subsetting for checking web work"
 privacy = "The password manager CLI and the Sysinternals suite"
 osint = "Public-source investigation: accounts, domains, media"
@@ -326,6 +326,122 @@ cmd = "markitdown"
 group = "docs"
 uv = "markitdown[docx,pptx,xlsx,pdf]"
 about = "Turns Word, PowerPoint, Excel and PDF files into clean Markdown."
+
+# docs: the libraries the pdf, docx, pptx and xlsx skills import. python ones go into the
+# user site of the python a new shell runs; node ones into ~/.argent/node, found through NODE_PATH
+
+[[tool]]
+cmd = "pypdf"
+group = "docs"
+pylib = "pypdf"
+module = "pypdf"
+about = "Reads, splits, merges and fills PDF forms."
+
+[[tool]]
+cmd = "pdfplumber"
+group = "docs"
+pylib = "pdfplumber"
+module = "pdfplumber"
+about = "Pulls text and tables out of PDFs with their positions."
+
+[[tool]]
+cmd = "reportlab"
+group = "docs"
+pylib = "reportlab"
+module = "reportlab"
+about = "Draws PDFs from code: reports, labels, certificates."
+
+[[tool]]
+cmd = "pymupdf"
+group = "docs"
+pylib = "pymupdf"
+module = "fitz"
+about = "Renders and edits PDFs fast; images, text and annotations."
+
+[[tool]]
+cmd = "pytesseract"
+group = "docs"
+pylib = "pytesseract"
+module = "pytesseract"
+about = "Python's bridge to Tesseract, for OCR inside a script."
+
+[[tool]]
+cmd = "pdf2image"
+group = "docs"
+pylib = "pdf2image"
+module = "pdf2image"
+about = "Turns PDF pages into images for OCR or previews."
+
+[[tool]]
+cmd = "python-docx"
+group = "docs"
+pylib = "python-docx"
+module = "docx"
+about = "Reads and writes Word documents."
+
+[[tool]]
+cmd = "python-pptx"
+group = "docs"
+pylib = "python-pptx"
+module = "pptx"
+about = "Reads and writes PowerPoint decks."
+
+[[tool]]
+cmd = "openpyxl"
+group = "docs"
+pylib = "openpyxl"
+module = "openpyxl"
+about = "Reads and writes Excel workbooks, formulas and styles included."
+
+[[tool]]
+cmd = "pandas"
+group = "docs"
+pylib = "pandas"
+module = "pandas"
+about = "Tables in memory: the data behind most spreadsheet work."
+
+[[tool]]
+cmd = "pillow"
+group = "docs"
+pylib = "pillow"
+module = "PIL"
+about = "Opens, resizes and converts images."
+
+[[tool]]
+cmd = "node:docx"
+group = "docs"
+nodelib = "docx"
+about = "Builds Word documents from JavaScript; what the docx skill writes with."
+
+[[tool]]
+cmd = "node:pptxgenjs"
+group = "docs"
+nodelib = "pptxgenjs"
+about = "Builds PowerPoint decks from JavaScript; what the pptx skill writes with."
+
+[[tool]]
+cmd = "node:react"
+group = "docs"
+nodelib = "react"
+about = "Renders the component trees the pptx skill turns into slides."
+
+[[tool]]
+cmd = "node:react-dom"
+group = "docs"
+nodelib = "react-dom"
+about = "React's renderer, which the pptx skill needs alongside react."
+
+[[tool]]
+cmd = "node:react-icons"
+group = "docs"
+nodelib = "react-icons"
+about = "Icon sets for slides, so decks never need emoji."
+
+[[tool]]
+cmd = "node:sharp"
+group = "docs"
+nodelib = "sharp"
+about = "Resizes and converts images for slides, fast."
 
 # web
 

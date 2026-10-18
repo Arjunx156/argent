@@ -9,6 +9,7 @@ import pytest
 from argent.installer import (
     ALREADY_INSTALLED,
     InstallError,
+    Places,
     install,
     install_release,
     steps_for,
@@ -19,6 +20,7 @@ from argent.tools import Release, load_manifest
 
 KIT = Path(__file__).resolve().parents[1] / "kit"
 MANIFEST = load_manifest(KIT / "tools.toml")
+PLACES = Places("C:/Py/python.exe", "C:/Users/t/site-packages", Path("C:/Users/t/.argent/node"))
 
 
 def zipped(name: str, content: bytes) -> bytes:
@@ -54,10 +56,11 @@ def test_uv_tools_carry_extras_and_follow_up_steps() -> None:
     assert playwright[-1].argv == ("playwright", "install", "chromium")
 
 
-def test_no_tool_ever_installs_through_pip() -> None:
+def test_no_tool_ever_installs_through_pip_itself() -> None:
     for tool in MANIFEST.tools:
-        for step in steps_for(tool):
-            assert "pip" not in step.argv
+        for step in steps_for(tool, PLACES):
+            assert step.argv[0] not in {"pip", "pip3", "python", "py"}, tool.cmd
+            assert "-m pip" not in " ".join(step.argv), tool.cmd
 
 
 def test_a_failing_step_names_the_command(env: Env) -> None:
@@ -93,6 +96,37 @@ def test_release_install_end_to_end_without_the_network(tmp_path: Path) -> None:
     }
     release = Release("t/t", "*x86_64-pc-windows-msvc.zip", "tectonic.exe")
 
-    dest = install_release(release, tmp_path / "bin", pages.__getitem__)
+    dest = install_release(release, tmp_path / "bin" / "tectonic.exe", pages.__getitem__)
 
     assert dest.read_bytes() == b"MZ binary"
+
+
+def test_python_libraries_go_into_the_user_site_through_uv() -> None:
+    [step] = steps_for(MANIFEST.get("python-pptx"), PLACES)
+    assert step.argv[:3] == ("uv", "pip", "install")
+    assert step.argv[4:6] == ("--python", "C:/Py/python.exe")
+    assert step.argv[6:8] == ("--target", "C:/Users/t/site-packages")
+    assert step.argv[-1] == "python-pptx"
+
+
+def test_python_libraries_need_a_python() -> None:
+    with pytest.raises(InstallError, match="no python"):
+        steps_for(MANIFEST.get("pypdf"), Places(None, None, Path("n")))
+
+
+def test_node_libraries_install_into_the_argent_prefix_and_node_path(
+    env: Env, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    remembered: list[tuple[str, Path]] = []
+    # never let a test write the real user environment
+    monkeypatch.setattr(
+        "argent.installer.ensure_user_list", lambda name, folder: remembered.append((name, folder))
+    )
+    ran: list[list[str]] = []
+    places = Places(None, None, env.state / "node")
+
+    install(MANIFEST.get("node:pptxgenjs"), env, places, run=lambda argv: ran.append(argv) or 0)
+
+    assert ran[0][:4] == ["npm", "install", "--prefix", str(env.state / "node")]
+    assert ran[0][-1] == "pptxgenjs"
+    assert remembered == [("NODE_PATH", env.state / "node" / "node_modules")]

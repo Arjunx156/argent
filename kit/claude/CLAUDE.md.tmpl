@@ -71,11 +71,11 @@ These apply to every project. A project's own CLAUDE.md adds to them and never l
 - Tectonic isn't installed. When .tex source itself is required, say so and offer `argent install docs`. Never install a TeX engine mid-task.
 {{/has}}
 - Coursework for {{ me.university }}, such as reports, lab records and assignments, follows the **coursework** skill.
-{{#has soffice}}
-- Word, PowerPoint and Excel files are handled by their skills, with LibreOffice, QPDF and Tesseract installed. Never pip or npm install for a document task.
+{{#has group:docs}}
+- Word, PowerPoint, Excel and PDF work goes through their skills. LibreOffice, QPDF, Tesseract and every Python and Node library those skills import are installed, so never pip or npm install for a document task.
 {{/has}}
-{{^has soffice}}
-- Word, PowerPoint and Excel files are handled by their skills. The Office toolchain isn't installed; when a task needs it, say so and offer `argent install docs` rather than installing mid-task.
+{{^has group:docs}}
+- Word, PowerPoint, Excel and PDF work goes through their skills, but their toolchain is only partly installed (`argent tools docs` shows what's missing). When a task hits a missing piece, say so and offer `argent install docs` rather than installing mid-task.
 {{/has}}
 
 ## Privacy

@@ -15,11 +15,12 @@ from argent.commands.deploy_cmd import Planned, make_plan
 from argent.kit import pretty
 from argent.merge import CHIME_MARK
 from argent.paths import Env
+from argent.probe import search_path
 from argent.profile import Profile, load_profile
 from argent.projects import survey
 from argent.render import branched_tools
 from argent.state import State
-from argent.tools import Detection, Manifest, detect, load_manifest, search_path
+from argent.tools import Detection, Manifest, detect, expand, load_manifest
 
 STATUSLINE_SAMPLE = json.dumps(
     {"workspace": {"current_dir": "C:/argent-doctor"}, "model": {"display_name": "Doctor"}}
@@ -178,7 +179,8 @@ def check_claims(ctx: Context) -> list[Finding]:
         return [Finding("info", "standing orders", "never deployed by argent", "argent deploy")]
     claimed = {t.cmd for t in ctx.manifest.tools if t.claim}
     for template in ctx.env.kit.rglob("*.tmpl"):
-        claimed |= branched_tools(template.read_text(encoding="utf-8"))
+        for name in branched_tools(template.read_text(encoding="utf-8")):
+            claimed |= expand(ctx.manifest, name)
     gone = sorted(t for t in state.tools if t in claimed and not ctx.found.has(t))
     new = sorted(t for t in claimed if ctx.found.has(t) and t not in state.tools)
     findings: list[Finding] = []
