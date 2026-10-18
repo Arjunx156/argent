@@ -8,6 +8,7 @@ from argent import __version__
 from argent.commands import (
     deploy_cmd,
     doctor_cmd,
+    harden_cmd,
     install_cmd,
     projects_cmd,
     shelve_cmd,
@@ -17,6 +18,7 @@ from argent.commands import (
 from argent.commands.shelve_cmd import ShelfError
 from argent.installer import InstallError
 from argent.paths import Env, RepoNotFoundError, adopt_legacy_state
+from argent.privacy import PrivacyError
 from argent.profile import ProfileError
 from argent.render import TemplateError
 from argent.ship import ShipError
@@ -34,6 +36,7 @@ EXPECTED = (
     ShelfError,
     ShipError,
     InstallError,
+    PrivacyError,
 )
 
 
@@ -44,7 +47,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"argent {__version__}")
     sub = parser.add_subparsers(title="commands", metavar="<command>")
-    modules = (doctor_cmd, deploy_cmd, ship_cmd, projects_cmd, tools_cmd, install_cmd, shelve_cmd)
+    modules = (
+        doctor_cmd,
+        deploy_cmd,
+        ship_cmd,
+        projects_cmd,
+        tools_cmd,
+        install_cmd,
+        harden_cmd,
+        shelve_cmd,
+    )
     for module in modules:
         module.register(sub)
     return parser

@@ -1,0 +1,111 @@
+# What `argent harden` sets. user settings need no admin; machine ones run with --machine
+# from an elevated terminal. Every value is recorded first, so `argent restore` undoes it.
+# All are DWORDs. The list started from Tadashi's privacy script.
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo'
+values = { Enabled = 0 }
+why = "No advertising ID tying your app use together"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Windows\CurrentVersion\Privacy'
+values = { TailoredExperiencesWithDiagnosticDataEnabled = 0 }
+why = "Diagnostic data isn't used to tailor tips and ads"
+
+[[setting]]
+scope = "user"
+key = 'Control Panel\International\User Profile'
+values = { HttpAcceptLanguageOptOut = 1 }
+why = "Websites don't get your language list to fingerprint you with"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Siuf\Rules'
+values = { NumberOfSIUFInPeriod = 0 }
+why = "Windows stops asking for feedback"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+values = { SilentInstalledAppsEnabled = 0, SystemPaneSuggestionsEnabled = 0, SoftLandingEnabled = 0, "SubscribedContent-338388Enabled" = 0, "SubscribedContent-338389Enabled" = 0, "SubscribedContent-338393Enabled" = 0, "SubscribedContent-353694Enabled" = 0, "SubscribedContent-353696Enabled" = 0 }
+why = "No silently installed apps, suggestions or promoted content"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy'
+values = { HasAccepted = 0 }
+why = "Speech recognition stays on the device"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\InputPersonalization'
+values = { RestrictImplicitTextCollection = 1, RestrictImplicitInkCollection = 1 }
+why = "What you type and ink stays on the device"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\InputPersonalization\TrainedDataStore'
+values = { HarvestContacts = 0 }
+why = "Your contacts aren't harvested to train typing suggestions"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Personalization\Settings'
+values = { AcceptedPrivacyPolicy = 0 }
+why = "Inking and typing personalisation stays off"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+values = { HideFileExt = 0, Hidden = 1 }
+why = "Extensions and hidden files show, so invoice.pdf.exe can't pass for a PDF"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+values = { Start_TrackProgs = 0, Start_IrisRecommendations = 0, ShowCopilotButton = 0 }
+why = "Start doesn't track launches or push recommendations, and Copilot leaves the taskbar"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Windows\CurrentVersion\Explorer'
+values = { ShowRecent = 0, ShowFrequent = 0 }
+why = "Quick Access doesn't list your recent files"
+
+[[setting]]
+scope = "user"
+key = 'Software\Microsoft\Windows\CurrentVersion\Search'
+values = { BingSearchEnabled = 0, CortanaConsent = 0 }
+why = "Start search stays local; nothing you type goes to Bing"
+
+[[setting]]
+scope = "machine"
+key = 'SOFTWARE\Policies\Microsoft\Windows\DataCollection'
+values = { AllowTelemetry = 1, DoNotShowFeedbackNotifications = 1 }
+why = "Diagnostic data at the lowest level Windows Home allows"
+
+[[setting]]
+scope = "machine"
+key = 'SOFTWARE\Policies\Microsoft\Windows\System'
+values = { PublishUserActivities = 0, UploadUserActivities = 0, EnableActivityFeed = 0 }
+why = "No activity history, kept or uploaded"
+
+[[setting]]
+scope = "machine"
+key = 'SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo'
+values = { DisabledByGroupPolicy = 1 }
+why = "The advertising ID stays off for every account"
+
+[[setting]]
+scope = "machine"
+key = 'SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot'
+values = { TurnOffWindowsCopilot = 1 }
+why = "Windows Copilot stays off"
+
+[[setting]]
+scope = "machine"
+key = 'SYSTEM\CurrentControlSet\Control\Remote Assistance'
+values = { fAllowToGetHelp = 0 }
+why = "Nobody can be invited to take over this machine through Remote Assistance"

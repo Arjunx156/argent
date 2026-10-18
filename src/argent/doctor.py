@@ -15,6 +15,7 @@ from argent.commands.deploy_cmd import Planned, make_plan
 from argent.kit import pretty
 from argent.merge import CHIME_MARK
 from argent.paths import Env
+from argent.privacy import WinRegistry, load_settings, pending
 from argent.probe import search_path
 from argent.profile import Profile, load_profile
 from argent.projects import survey
@@ -334,6 +335,18 @@ def check_projects(ctx: Context) -> list[Finding]:
     return findings
 
 
+def check_privacy(ctx: Context) -> list[Finding]:
+    if sys.platform != "win32":
+        return []
+    values = [v for v in load_settings(ctx.env.kit / "privacy.toml") if v.scope == "user"]
+    left = pending(values, WinRegistry())
+    if not left:
+        return [Finding("pass", "privacy", f"all {len(values)} user settings hardened")]
+    done = len(values) - len(left)
+    detail = f"{done} of {len(values)} user settings hardened"
+    return [Finding("info", "privacy", detail, "argent harden --dry-run shows them")]
+
+
 def check_snapshots(ctx: Context) -> list[Finding]:
     snaps = ctx.env.snapshots
     if not snaps.is_dir():
@@ -358,6 +371,7 @@ CHECKS: list[tuple[str, Check]] = [
     ("skills", check_skills),
     ("hooks", check_hooks),
     ("projects", check_projects),
+    ("privacy", check_privacy),
     ("snapshots", check_snapshots),
 ]
 

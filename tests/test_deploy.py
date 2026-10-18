@@ -193,7 +193,7 @@ def test_restore_puts_back_what_was_there_and_deletes_what_wasnt(env: Env, clock
 
     restored = restore(env, name, clock=clock)
 
-    assert sorted(p.name for p in restored) == ["new.txt", "old.txt"]
+    assert sorted(Path(p).name for p in restored) == ["new.txt", "old.txt"]
     assert old.read_bytes() == b"original"
     assert not fresh.exists()
     assert not State.load(env).owns(old)

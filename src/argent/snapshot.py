@@ -1,4 +1,8 @@
-"""Snapshots: a copy of everything a run is about to touch, and a journal to undo it."""
+"""Snapshots: a copy of everything a run is about to touch, and a journal to undo it.
+
+A journal holds three kinds of entry: files (copied), registry values (their old data),
+and system settings like the firewall (their old state, as read back from PowerShell).
+"""
 
 import json
 import shutil
@@ -6,8 +10,20 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from argent.paths import Env
+from argent.privacy import (
+    STEPS,
+    Current,
+    PrivacyError,
+    Registry,
+    Shell,
+    WinRegistry,
+    capture,
+    powershell,
+    undo_script,
+)
 from argent.state import State, write_atomic
 
 Clock = Callable[[], datetime]
@@ -54,6 +70,15 @@ class Snapshot:
             shutil.copy2(dest, self.path / stored)
         self.entries.append({"dest": str(dest), "existed": stored is not None, "stored": stored})
 
+    def keep_registry(self, scope: str, key: str, name: str, current: Current) -> None:
+        old = {"existed": current is not None, "data": None, "kind": None}
+        if current is not None:
+            old = {"existed": True, "data": current[0], "kind": current[1]}
+        self.entries.append({"registry": {"scope": scope, "key": key, "name": name, **old}})
+
+    def keep_system(self, step: str, state: object) -> None:
+        self.entries.append({"system": {"step": step, "state": state}})
+
     def save(self) -> None:
         body = {"reason": self.reason, "created": self.created.isoformat(), "files": self.entries}
         write_atomic(self.path / JOURNAL, (json.dumps(body, indent=2) + "\n").encode("utf-8"))
@@ -72,29 +97,75 @@ def list_snapshots(env: Env) -> list[SnapshotInfo]:
     return found
 
 
-def restore(env: Env, name: str, clock: Clock) -> list[Path]:
-    """Put every journaled file back as it was, and delete the ones that didn't exist."""
+def restore(
+    env: Env,
+    name: str,
+    clock: Clock,
+    registry: Registry | None = None,
+    shell: Shell | None = None,
+) -> list[str]:
+    """Put back everything a snapshot journaled. Returns a label per thing restored."""
     journal = env.snapshots / name / JOURNAL
     if not journal.is_file():
         raise UnknownSnapshotError(f"no snapshot named {name!r}; `argent restore` lists them")
-    entries = json.loads(journal.read_text(encoding="utf-8"))["files"]
+    entries: list[dict[str, Any]] = json.loads(journal.read_text(encoding="utf-8"))["files"]
+    needs_registry = any("registry" in e for e in entries)
+    needs_shell = any("system" in e for e in entries)
+    registry = registry or (WinRegistry() if needs_registry else None)
+    shell = shell or (powershell if needs_shell else None)
 
     undo = Snapshot.create(env, f"restore {name}", clock)
     for entry in entries:
-        undo.keep(Path(entry["dest"]))
+        if "dest" in entry:
+            undo.keep(Path(entry["dest"]))
+        elif "registry" in entry and registry:
+            r = entry["registry"]
+            undo.keep_registry(
+                r["scope"], r["key"], r["name"], registry.read(r["scope"], r["key"], r["name"])
+            )
+        elif "system" in entry and shell:
+            step = entry["system"]["step"]
+            undo.keep_system(step, capture(STEPS[step], shell))
     # journal first, like deploy, so a restore that fails halfway can itself be undone
     undo.save()
 
     state = State.load(env)
-    touched: list[Path] = []
+    touched: list[str] = []
     for entry in entries:
-        dest = Path(entry["dest"])
-        if entry["existed"]:
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(env.snapshots / name / entry["stored"], dest)
-        elif dest.exists():
-            dest.unlink()
-        state.forget(dest)
-        touched.append(dest)
+        if "dest" in entry:
+            touched.append(_restore_file(env, name, entry, state))
+        elif "registry" in entry and registry:
+            touched.append(_restore_registry(entry["registry"], registry))
+        elif "system" in entry and shell:
+            touched.append(_restore_system(entry["system"], shell))
     state.save()
     return touched
+
+
+def _restore_file(env: Env, name: str, entry: dict[str, Any], state: State) -> str:
+    dest = Path(entry["dest"])
+    if entry["existed"]:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(env.snapshots / name / entry["stored"], dest)
+    elif dest.exists():
+        dest.unlink()
+    state.forget(dest)
+    return str(dest)
+
+
+def _restore_registry(old: dict[str, Any], registry: Registry) -> str:
+    if old["existed"]:
+        registry.write(old["scope"], old["key"], old["name"], old["data"], old["kind"])
+    else:
+        registry.delete(old["scope"], old["key"], old["name"])
+    hive = "HKCU" if old["scope"] == "user" else "HKLM"
+    return rf"{hive}\{old['key']}\{old['name']}"
+
+
+def _restore_system(old: dict[str, Any], shell: Shell) -> str:
+    script = undo_script(old["step"], old["state"])
+    if script:
+        code, out = shell(script)
+        if code != 0:
+            raise PrivacyError(f"couldn't put the {old['step']} settings back: {out}")
+    return f"{old['step']} settings"

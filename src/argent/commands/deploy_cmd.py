@@ -148,8 +148,9 @@ def run_restore(args: argparse.Namespace, env: Env, out: Out) -> int:
         return 0
     touched = restore(env, args.name, clock=datetime.now)
     out.heading(f"restored {args.name}")
-    for path in touched:
-        out.tag("set", pretty(env, path))
+    for label in touched:
+        path = Path(label)
+        out.tag("set", pretty(env, path) if path.is_absolute() else label)
     out.line()
     out.line(out.dim("restoring took its own snapshot, so this can be undone too"))
     return 0
