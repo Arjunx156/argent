@@ -15,9 +15,10 @@ from typing import Any
 from argent.paths import Env
 
 CHARS_PER_TOKEN = 4
-# argent's own budget for always-loaded text, not a Claude Code limit: the kit itself needs
-# about 2,700 tokens, and past this the skill list gets long enough to crowd descriptions out
-TARGET = 6_000
+# argent's own budget for always-loaded text, not a Claude Code limit: the kit needs about
+# 2,800 tokens and a coursework plugin like matlab's about 3,100 more. past this the skill
+# list gets long enough that descriptions start being dropped
+TARGET = 8_000
 FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---", re.DOTALL)
 
 

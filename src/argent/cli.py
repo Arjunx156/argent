@@ -66,6 +66,18 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+STORE_PYTHON = (
+    "argent is running on the Microsoft Store Python, which sees a private copy of AppData and "
+    "the registry, so it would read and write the wrong files. Reinstall it on another Python: "
+    "uv tool install --editable <repo> --python 3.14 --reinstall"
+)
+
+
+def store_python() -> bool:
+    # a venv keeps its base interpreter's location in base_prefix
+    return "PythonSoftwareFoundation.Python" in sys.base_prefix
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -76,6 +88,9 @@ def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # pyright: ignore[reportAttributeAccessIssue]
     out = Out()
+    if store_python():
+        out.tag("fail", STORE_PYTHON)
+        return 2
     try:
         env = Env.from_system()
         if adopt_legacy_state(env):
