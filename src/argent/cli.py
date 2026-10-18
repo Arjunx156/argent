@@ -10,6 +10,7 @@ from argent.commands import (
     doctor_cmd,
     harden_cmd,
     install_cmd,
+    library_cmd,
     projects_cmd,
     shelve_cmd,
     ship_cmd,
@@ -17,6 +18,7 @@ from argent.commands import (
 )
 from argent.commands.shelve_cmd import ShelfError
 from argent.installer import InstallError
+from argent.library import LibraryError
 from argent.paths import Env, RepoNotFoundError, adopt_legacy_state
 from argent.privacy import PrivacyError
 from argent.profile import ProfileError
@@ -37,6 +39,7 @@ EXPECTED = (
     ShipError,
     InstallError,
     PrivacyError,
+    LibraryError,
 )
 
 
@@ -55,6 +58,7 @@ def build_parser() -> argparse.ArgumentParser:
         tools_cmd,
         install_cmd,
         harden_cmd,
+        library_cmd,
         shelve_cmd,
     )
     for module in modules:

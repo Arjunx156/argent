@@ -1,0 +1,43 @@
+# Public skill repos that `argent library sync` mirrors into ~/.claude/skill-library.
+# Mirrors are data: nothing in them loads into Claude or runs. To use one, read its SKILL.md
+# in full, then copy the folder into kit/claude/skills with a SOURCE file and deploy.
+
+[[repo]]
+name = "anthropics/skills"
+why = "Anthropic's own skills: documents, design, MCP and more"
+
+[[repo]]
+name = "obra/superpowers"
+why = "Development method: TDD, debugging, planning, verification"
+
+[[repo]]
+name = "addyosmani/agent-skills"
+why = "The production engineering lifecycle"
+
+[[repo]]
+name = "mattpocock/skills"
+why = "Engineering workflows: TDD, diagnosis, design, specs"
+
+[[repo]]
+name = "anthropics/claude-plugins-official"
+why = "The official plugin directory, including MCP and plugin development"
+
+[[repo]]
+name = "trailofbits/skills"
+why = "Security research and audit workflows"
+
+[[repo]]
+name = "getsentry/skills"
+why = "Sentry's engineering team: review, bug finding, PR hygiene"
+
+[[repo]]
+name = "vercel-labs/agent-skills"
+why = "React and Next.js performance and web design rules"
+
+[[repo]]
+name = "cloudflare/security-audit-skill"
+why = "A multi-phase, verified security audit"
+
+[[repo]]
+name = "garrytan/gstack"
+why = "A plan, review, QA and ship workflow"
