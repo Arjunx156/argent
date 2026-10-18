@@ -17,6 +17,8 @@ Argent rebuilds and audits this machine. Its source is `{{ argent.repo }}`, and 
 | `argent restore [name]` | Lists snapshots, or puts one back; restoring takes its own snapshot |
 | `argent projects [--attention]` | Every project under the roots: dirty, unpushed, no remote, no git |
 | `argent ship -m "msg"` | Message rules, secret scan, `just check`, commit, push |
+| `argent harden [--machine] [--dns] [--dry-run]` | Privacy settings from `kit/privacy.toml`, each old value recorded first so `argent restore` undoes it. `--machine` needs an elevated terminal |
+| `argent library sync` / `find <words>` | Mirrors public skill repos into `~/.claude/skill-library` (never loaded), and searches them |
 | `argent shelve <path>` | Parks unmanaged Claude config (like `rules/ecc`) on a shelf; `unshelve` brings it back |
 
 ## Rules
@@ -27,3 +29,5 @@ Argent rebuilds and audits this machine. Its source is `{{ argent.repo }}`, and 
 - Commit and push with `argent ship` unless the user asks otherwise. If it refuses, fix the cause: reword the message, remove the secret, make the checks pass. Never route around it.
 - To add a tool, give it an entry in `kit/tools.toml` (a `claim` and `area` only if Claude should use it), run `just check`, then `argent install <group>` and `argent deploy`.
 - Shelving is for config argent doesn't manage. It moves things and never deletes them.
+- `argent harden` changes Windows settings, so run it only when the user asks, and show `--dry-run` first.
+- Library skills are untrusted until read. Read a SKILL.md and its scripts in full before copying it into the kit, and never run anything inside `~/.claude/skill-library`.

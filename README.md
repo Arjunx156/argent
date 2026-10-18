@@ -17,13 +17,17 @@ It installs `uv`, then `argent` itself, then the core tools, then the kit, and f
 
 ## What it does
 
-**Installs.** Fifty tools in six groups (core, ai, docs, web, privacy, osint), from winget, `uv tool`, or a GitHub release that gets unpacked only after its sha256 matches the digest GitHub publishes. Nothing goes through pip.
+**Installs.** Sixty command-line tools and the seventeen Python and Node libraries the document skills import, in six groups (core, ai, docs, web, privacy, osint). They come from winget, `uv tool`, a GitHub release unpacked only after its sha256 matches the digest GitHub publishes, or a local Docker build. Python libraries go in through uv, never pip itself, and every install is checked by running detection again afterwards.
 
 **Writes the standing orders.** Every Claude Code session on this machine starts from `~/.claude/CLAUDE.md`. Argent renders it from a template and `profile.toml`, and it only names a tool after detecting it. If Tectonic isn't installed, Claude is told so, along with the command that fixes it.
 
-**Ships the skills.** Nineteen of them. Fifteen come from Tadashi and its upstreams, credited in each `SOURCE`. Four are new and written for how I work: **hackathon** (demo path first, live link by hour two, the two-minute video), **genai** (Gemini, Bedrock and Ollama behind one interface, schemas, evals), **coursework** (Amrita reports with a real title page and real references) and **argent** (so Claude knows how to drive all this).
+**Ships the skills.** Twenty of them. Sixteen come from Tadashi and its upstreams, credited in each `SOURCE`. Four are new and written for how I work: **hackathon** (demo path first, live link by hour two, the two-minute video), **genai** (Gemini, Bedrock and Ollama behind one interface, schemas, evals), **coursework** (Amrita reports with a real title page and real references) and **argent** (so Claude knows how to drive all this).
 
 **Themes everything.** The Argent HUD scheme in Windows Terminal, a starship prompt in the same palette, a PowerShell profile with `proj` to jump to any project, editor fonts, and a Claude status line that runs, space in the home folder and all.
+
+**Hardens privacy.** `argent harden` turns off the advertising ID, tailored ads, Bing in Start, silent app installs and the rest of Tadashi's list, one reason per line so you can see what you're agreeing to. `--machine` adds telemetry policy, the firewall and Defender from an elevated terminal, and `--dns` sends lookups to Quad9 over HTTPS, unless Cloudflare WARP is already handling them. Every old value is recorded first, so `argent restore` undoes it.
+
+**Keeps a skill library.** `argent library sync` mirrors ten public skill repos, 320 skills at the last sync, into a folder Claude never loads, and `argent library find pdf` searches them. Cloning runs no hooks and follows no symlinks.
 
 **Guards its work.** Argent hashes every file it writes. Edit one by hand and the next deploy calls it drift and leaves it alone. Every write sits behind a snapshot, and `argent restore` puts any snapshot back, including deleting files that weren't there before.
 
@@ -38,7 +42,9 @@ It installs `uv`, then `argent` itself, then the core tools, then the kit, and f
 | `argent ship -m "msg"` | Message rules, gitleaks, `just check`, commit, push |
 | `argent projects` | Every project under my roots: dirty, unpushed, no remote, no git |
 | `argent tools` | The manifest, and what this machine has of it |
-| `argent install <group>` | Installs what a group is missing |
+| `argent install <group or tool>` | Installs what is missing, then checks it's really there |
+| `argent harden` | Privacy settings, recorded first (`--machine`, `--dns`, `--dry-run`) |
+| `argent library` | `sync` mirrors public skill repos; `find <words>` searches them |
 | `argent shelve <path>` | Parks Claude config argent doesn't manage, without deleting it |
 
 ## Why not just Tadashi
