@@ -1,0 +1,29 @@
+---
+name: edith
+description: Use when this machine's setup needs checking or changing (a tool is missing, the standing orders or skills are out of date, the status line or terminal theme is wrong, a project's git state is unclear) and to commit and push with `edith ship`. Covers the edith CLI, what each command touches, and where its source lives.
+---
+
+# Edith
+
+Edith rebuilds and audits this machine. Its source is `{{ edith.repo }}`, and that repo, not `~/.claude`, is where every change starts.
+
+| Command | What it does |
+|---|---|
+| `edith doctor` | Checks every claim: tools, standing orders, status line, git identity, PATH, stray rules and skills, projects. Exit 1 on any failure |
+| `edith tools [group] [--missing]` | What the manifest lists and what's installed |
+| `edith install <group>` | Installs a group's missing tools: winget, `uv tool`, or a digest-checked GitHub release |
+| `edith deploy [--dry-run]` | Renders the kit into place behind a snapshot. Exit 1 means some files were edited by hand and left alone |
+| `edith diff [text]` | The exact lines deploy would change |
+| `edith restore [name]` | Lists snapshots, or puts one back; restoring takes its own snapshot |
+| `edith projects [--attention]` | Every project under the roots: dirty, unpushed, no remote, no git |
+| `edith ship -m "msg"` | Message rules, secret scan, `just check`, commit, push |
+| `edith shelve <path>` | Parks unmanaged Claude config (like `rules/ecc`) on a shelf; `unshelve` brings it back |
+
+## Rules
+
+- Never edit `~/.claude/CLAUDE.md`, the status line, or a kit skill in place: deploy would see the edit as drift. Change the kit in `{{ edith.repo }}/kit`, run `just check` there, then `edith deploy`.
+- After `edith install`, run `edith deploy` so the standing orders name the new tools.
+- When deploy reports drift, show `edith diff` and ask before `--force`; the hand edit may be worth moving into the kit.
+- Commit and push with `edith ship` unless the user asks otherwise. If it refuses, fix the cause: reword the message, remove the secret, make the checks pass. Never route around it.
+- To add a tool, give it an entry in `kit/tools.toml` (a `claim` and `area` only if Claude should use it), run `just check`, then `edith install <group>` and `edith deploy`.
+- Shelving is for config edith doesn't manage. It moves things and never deletes them.

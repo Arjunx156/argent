@@ -1,0 +1,54 @@
+---
+name: coursework
+description: Use for university work at {{ me.university }}: lab records, project and seminar reports, assignments, case studies and MATLAB or Simulink simulation write-ups. Sets the structure, the title page with "Submitted by", figure, equation and citation conventions, and hands the PDF to folio.
+---
+
+# Coursework
+
+A report a professor can grade in five minutes: the result is findable, every figure is labelled, every number has a unit, and every reference is real.
+
+## Before writing
+
+Ask once for anything the title page needs and the brief doesn't give, and never invent it: course code and name, roll number, faculty name, campus, and the due date. If the brief bans AI help, say so before writing anything.
+
+## Title page
+
+Folio's front matter carries it. Fill every `<slot>` with the real value:
+
+```markdown
+---
+title: Adaptive Cruise Control for a Smart Vehicle
+subtitle: <course code> <course name>, <assignment>
+author: Submitted by {{ me.name }}, <roll number>
+date: <due date>
+note: Submitted to <faculty>, <department>, {{ me.university }}
+---
+```
+
+## Structure
+
+**Lab record, per experiment:** Aim, Apparatus or Software, Theory, Procedure, Code or Circuit, Observations, Result, Inference.
+
+**Project or seminar report:** Abstract (150 words, with the key number), Introduction, Background, Method, Implementation, Results and Discussion, Conclusion and Future Work, References.
+
+**Assignment:** restate each question in bold, answer it directly, then show the working.
+
+## Figures, equations and numbers
+
+- Every figure has a numbered caption that says what to notice ("Figure 3: overshoot drops from 18% to 4% with the tuned gains"), axes with units, and a mention in the text.
+- Equations are numbered when referenced. Define every symbol on first use.
+- Report measured numbers with units and sensible precision: rise time 1.2 s, not 1.18342 s.
+
+## MATLAB and Simulink
+
+- One script regenerates every figure and table: `matlab -batch "run('main.m')"`. Never paste screenshots of plots.
+- Export vector figures: `exportgraphics(gcf, "fig/step.pdf", ContentType="vector")`.
+- Take step metrics from `stepinfo`, not by eye. The matlab skills cover syntax, debugging and tests.
+
+## Citations
+
+IEEE style, numbered in order of use. Every reference must be real and checked: open the DOI or URL before citing it. A made-up reference is worse than none.
+
+## Voice
+
+Formal register through the **voice** skill: first person plural is fine ("we tuned the controller"), no filler, no slop. Then build the PDF with **folio** and look at every page before handing it in.

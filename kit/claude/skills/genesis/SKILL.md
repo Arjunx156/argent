@@ -14,8 +14,10 @@ Infer it from the request. Ask only when two stacks are equally plausible and th
 | Kind | Stack |
 |---|---|
 | Python app, CLI, data or ML | `uv` + `ruff` + `basedpyright` + `pytest` |
+| GenAI service, agent or RAG backend | the Python row plus FastAPI, `pydantic-settings` and the **genai** skill's provider layout |
 | TypeScript library, CLI or server | `bun` + TypeScript strict + `biome` + `bun test` |
 | Web app | Vite + React + TypeScript + Tailwind v4, or Next.js when it needs SSR or routes, with `bun` + `biome` |
+| Hackathon build | the web app row, or the GenAI row behind it, plus the **hackathon** skill |
 | Documents | Markdown sources + folio (see that skill) |
 | Rust | `cargo` + `clippy` + `rustfmt` (install the toolchain with `winget install Rustlang.Rustup` if missing) |
 
