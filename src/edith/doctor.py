@@ -317,14 +317,12 @@ def check_projects(ctx: Context) -> list[Finding]:
         findings.append(Finding("pass", "projects", f"all {len(projects)} committed and pushed"))
         return findings
     kinds = {
-        "uncommitted changes": sum(p.changed > 0 for p in needy),
-        "unpushed commits": sum(p.ahead > 0 for p in needy),
-        "no remote": sum(p.is_repo and not p.remotes for p in needy),
-        "no git": sum(not p.is_repo for p in needy),
+        "with uncommitted changes": sum(p.changed > 0 for p in needy),
+        "with unpushed commits": sum(p.ahead > 0 for p in needy),
+        "without a remote": sum(p.is_repo and not p.remotes for p in needy),
+        "without git": sum(not p.is_repo for p in needy),
     }
-    parts = ", ".join(
-        f"{n} with {k}" if k.startswith("un") else f"{n} {k}" for k, n in kinds.items() if n
-    )
+    parts = ", ".join(f"{n} {kind}" for kind, n in kinds.items() if n)
     detail = f"{len(needy)} of {len(projects)} need you: {parts}"
     findings.append(Finding("info", "projects", detail, "edith projects --attention"))
     return findings
