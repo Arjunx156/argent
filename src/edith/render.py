@@ -15,6 +15,7 @@ from edith.tools import Detection, Manifest
 STANDALONE = re.compile(r"(?m)^[ \t]*(\{\{[#^/]has[^}]*\}\})[ \t]*\r?\n")
 SECTION = re.compile(r"\{\{([#^])has ([^}]+?)\}\}(.*?)\{\{/has\}\}", re.DOTALL)
 VALUE = re.compile(r"\{\{\s*([\w.]+)\s*\}\}")
+BRANCH = re.compile(r"\{\{[#^]has ([^}]+?)\}\}")
 
 
 class TemplateError(ValueError):
@@ -59,3 +60,8 @@ def tools_block(manifest: Manifest, found: Detection, indent: str = "  ") -> str
         note = f"; {area.note}" if area.note else ""
         lines.append(f"{indent}- {area.name}: {', '.join(claims)}{note}.")
     return "\n".join(lines)
+
+
+def branched_tools(text: str) -> set[str]:
+    """Tools a template changes its wording for."""
+    return {name.strip() for name in BRANCH.findall(text)}
