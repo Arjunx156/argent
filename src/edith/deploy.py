@@ -19,7 +19,7 @@ WRITES = {"new", "update", "adopt", "remove"}
 IGNORED_DIRS = {"__pycache__"}
 
 
-class SkipTarget(Exception):
+class SkipTargetError(Exception):
     """Raised by a build when it can't safely produce content; the reason is shown."""
 
 
@@ -80,7 +80,7 @@ def _plan_one(target: Target, state: State) -> Action:
 
     try:
         desired = target.build(current)
-    except SkipTarget as err:
+    except SkipTargetError as err:
         return act("skip", None, str(err))
 
     if desired == current:

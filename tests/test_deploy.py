@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from edith.deploy import Action, SkipTarget, Target, apply, plan
+from edith.deploy import Action, SkipTargetError, Target, apply, plan
 from edith.paths import Env
 from edith.snapshot import list_snapshots, restore
 from edith.state import State
@@ -140,7 +140,7 @@ def test_merged_files_never_drift(env: Env, clock: Clock) -> None:
 
 def test_targets_can_skip_with_a_reason(env: Env, clock: Clock) -> None:
     def refuse(_current: bytes | None) -> bytes | None:
-        raise SkipTarget("has comments; merge by hand")
+        raise SkipTargetError("has comments; merge by hand")
 
     dest = env.home / "settings.json"
     actions = deploy(env, [Target(dest=dest, label="s", build=refuse, whole=False)], clock)
