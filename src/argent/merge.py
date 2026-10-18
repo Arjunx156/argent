@@ -35,7 +35,10 @@ def dump_json(
     return (json.dumps(after, indent=indent, ensure_ascii=False) + "\n").encode("utf-8")
 
 
-def claude_settings(current: bytes | None, statusline: str, chimes: bool) -> bytes:
+def claude_settings(
+    current: bytes | None, statusline: str, chimes: bool, retire: tuple[str, ...] = ()
+) -> bytes:
+    """`retire` holds text that marks hooks from other tools the profile has switched off."""
     before = load_json(current, "Claude settings.json")
     _expect(before, "env", dict, "Claude settings.json")
     _expect(before, "hooks", dict, "Claude settings.json")
@@ -48,6 +51,14 @@ def claude_settings(current: bytes | None, statusline: str, chimes: bool) -> byt
     after.setdefault("env", {})["DO_NOT_TRACK"] = "1"
 
     hooks: dict[str, Any] = after.setdefault("hooks", {})
+    for event in list(hooks):
+        groups = hooks[event] if isinstance(hooks[event], list) else []
+        kept = [g for g in groups if not any(mark in json.dumps(g) for mark in retire)]
+        if retire and len(kept) != len(groups):
+            if kept:
+                hooks[event] = kept
+            else:
+                del hooks[event]
     for event, sound in CHIMES.items():
         kept = [g for g in hooks.get(event, []) if CHIME_MARK not in json.dumps(g)]
         if chimes:

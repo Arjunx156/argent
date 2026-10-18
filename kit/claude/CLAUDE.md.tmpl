@@ -19,6 +19,11 @@ These apply to every project. A project's own CLAUDE.md adds to them and never l
   - Keep checks proportional to the risk.
 - Batch independent tool calls, and run long jobs in the background.
 
+## Skills and agents
+- Skills load themselves: load one only when the task clearly matches its description, never to answer a question, make a small edit, or just in case.
+- One skill per job. Where two could apply, these orders name the one that wins.
+- Subagents start cold and cost tens of thousands of tokens. Use one only when the user asks, or for a search too broad to run here.
+
 ## This machine
 - Windows 11, PowerShell 7 by default, with Git Bash available. The home folder has a space in it, so quote every path.
 - The budget is zero: only free tools and free tiers.

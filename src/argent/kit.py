@@ -63,7 +63,12 @@ def build_kit(env: Env, profile: Profile, manifest: Manifest, found: Detection) 
 
     statusline = (env.claude / "statusline.py").as_posix()
     settings = env.claude / "settings.json"
-    build = partial(claude_settings, statusline=statusline, chimes=profile.chimes)
+    build = partial(
+        claude_settings,
+        statusline=statusline,
+        chimes=profile.chimes,
+        retire=profile.retire_hooks,
+    )
     targets.append(Target(settings, pretty(env, settings), build, whole=False))
 
     config = env.kit / "config"

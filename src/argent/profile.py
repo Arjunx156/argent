@@ -20,6 +20,7 @@ class Profile:
     university: str
     roots: tuple[Path, ...]
     chimes: bool
+    retire_hooks: tuple[str, ...] = ()
 
     def context(self) -> dict[str, str]:
         """What templates may refer to as {{ me.* }}."""
@@ -60,6 +61,11 @@ def load_profile(env: Env) -> Profile:
     if not isinstance(chimes, bool):
         raise ProfileError("claude.chimes must be true or false")
 
+    retire = claude.get("retire_hooks", [])
+    if not isinstance(retire, list) or not all(isinstance(r, str) and r for r in retire):
+        example = '["superpowers-plugin"]'
+        raise ProfileError(f"claude.retire_hooks must be a list of text, like {example}")
+
     return Profile(
         name=_text(me, "me.name"),
         email=email,
@@ -68,6 +74,7 @@ def load_profile(env: Env) -> Profile:
         university=_text(me, "me.university"),
         roots=tuple(env.expand(r) for r in roots),
         chimes=chimes,
+        retire_hooks=tuple(retire),
     )
 
 

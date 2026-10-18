@@ -1,6 +1,6 @@
 ---
 name: voice
-description: The formal register for professional writing such as emails to professors or employers, applications, cover letters, official reports, documentation and UI error text. Warm, kind, professional and humble. For everyday writing, use vibe instead.
+description: Use when writing formally as the user: an email to a professor or employer, an application, a cover letter, an official report or UI error text. Warm, kind, professional and humble. Everyday pieces use vibe.
 ---
 
 # Voice

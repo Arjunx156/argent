@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from argent.commands.deploy_cmd import Planned, make_plan
+from argent.context import TARGET, card_size, desktop_plugins, measure, scoped_rule
 from argent.kit import pretty
 from argent.merge import CHIME_MARK
 from argent.paths import Env
@@ -26,7 +27,6 @@ from argent.tools import Detection, Manifest, detect, expand, load_manifest
 STATUSLINE_SAMPLE = json.dumps(
     {"workspace": {"current_dir": "C:/argent-doctor"}, "model": {"display_name": "Doctor"}}
 ).encode()
-FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---", re.DOTALL)
 
 
 @dataclass(frozen=True)
@@ -212,7 +212,7 @@ def check_statusline(ctx: Context) -> list[Finding]:
 def check_rules(ctx: Context) -> list[Finding]:
     rules = ctx.env.claude / "rules"
     always = (
-        [p for p in sorted(rules.rglob("*.md")) if not _scoped_rule(p)] if rules.is_dir() else []
+        [p for p in sorted(rules.rglob("*.md")) if not scoped_rule(p)] if rules.is_dir() else []
     )
     if not always:
         return [Finding("pass", "always-on rules", "none beside the standing orders")]
@@ -226,11 +226,22 @@ def check_rules(ctx: Context) -> list[Finding]:
     return [Finding("warn", "always-on rules", detail, f"argent shelve {shelf}")]
 
 
-def _scoped_rule(path: Path) -> bool:
-    """Rules with paths: in their frontmatter load only when matching files are touched."""
-    head = path.read_text(encoding="utf-8", errors="replace")[:2000]
-    match = FRONTMATTER.match(head)
-    return bool(match and re.search(r"(?m)^paths:", match.group(1)))
+def check_context(ctx: Context) -> list[Finding]:
+    sources = [s for s in measure(ctx.env) if s.chars]
+    total = sum(s.tokens for s in sources)
+    heavy = ", ".join(f"{s.name} {s.tokens:,}" for s in sorted(sources, key=lambda s: -s.tokens))
+    detail = f"~{total:,} tokens load before your first message ({heavy})"
+    findings = [
+        Finding("pass", "context", detail)
+        if total <= TARGET
+        else Finding("warn", "context", detail, "argent shelve the heaviest source you don't use")
+    ]
+    desktop = desktop_plugins(ctx.env)
+    if desktop.items:
+        detail = f"{desktop.items} plugin skills add ~{desktop.tokens:,} tokens in the Claude app"
+        fix = "turn off the plugins you don't use in the app's plugin settings"
+        findings.append(Finding("info", "context", detail, fix))
+    return findings
 
 
 def check_hooks(ctx: Context) -> list[Finding]:
@@ -260,7 +271,7 @@ def check_skills(ctx: Context) -> list[Finding]:
             continue
         if overrides.get(skill.name) == "off":
             continue
-        loaded.append((skill.name, _description_size(card)))
+        loaded.append((skill.name, card_size(card)))
     if not loaded:
         return [Finding("pass", "skills", "every active skill comes from the kit")]
     size = sum(n for _, n in loaded)
@@ -270,14 +281,6 @@ def check_skills(ctx: Context) -> list[Finding]:
         f"to every session: {names}"
     )
     return [Finding("info", "skills", detail, "argent shelve skills/<name> parks one")]
-
-
-def _description_size(card: Path) -> int:
-    match = FRONTMATTER.match(card.read_text(encoding="utf-8", errors="replace"))
-    if not match:
-        return 0
-    found = re.search(r"(?ms)^description:(.*?)(?=^\S|\Z)", match.group(1))
-    return len(found.group(1).strip()) if found else 0
 
 
 def check_path(ctx: Context) -> list[Finding]:
@@ -369,6 +372,7 @@ CHECKS: list[tuple[str, Check]] = [
     ("PATH", check_path),
     ("always-on rules", check_rules),
     ("skills", check_skills),
+    ("context", check_context),
     ("hooks", check_hooks),
     ("projects", check_projects),
     ("privacy", check_privacy),

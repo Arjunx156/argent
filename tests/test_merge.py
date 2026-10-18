@@ -148,3 +148,34 @@ def test_odd_claude_settings_shapes_are_skipped() -> None:
 def test_block_keeps_form_feeds_inside_lines() -> None:
     merged = managed_block(b"$a = 'x\x0cy'\r\n", BODY)
     assert merged.startswith(b"$a = 'x\x0cy'\r\n")
+
+
+SUPERPOWERS = {
+    "matcher": "startup|clear|compact",
+    "hooks": [
+        {
+            "type": "command",
+            "command": r'"C:\Users\A B\.claude\superpowers-plugin\hooks\sp-session-start.cmd"',
+        }
+    ],
+}
+MINE = {"hooks": [{"type": "command", "command": "my-own-hook"}]}
+
+
+def test_retired_hooks_are_removed_and_the_rest_kept() -> None:
+    settings = {"hooks": {"SessionStart": [SUPERPOWERS, MINE]}}
+    merged = json.loads(
+        claude_settings(
+            as_bytes(settings), STATUSLINE, chimes=False, retire=("superpowers-plugin",)
+        )
+    )
+    assert merged["hooks"]["SessionStart"] == [MINE]
+
+
+def test_retiring_the_only_hook_drops_the_event() -> None:
+    settings = {"hooks": {"SessionStart": [SUPERPOWERS]}}
+    once = claude_settings(
+        as_bytes(settings), STATUSLINE, chimes=False, retire=("superpowers-plugin",)
+    )
+    assert "hooks" not in json.loads(once)
+    assert claude_settings(once, STATUSLINE, chimes=False, retire=("superpowers-plugin",)) is once

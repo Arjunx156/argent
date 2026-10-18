@@ -17,3 +17,6 @@ roots = [
 [claude]
 # a soft chime when a turn ends, another when Claude needs you
 chimes = true
+# hooks from other tools that deploy keeps out of settings.json, matched by their command.
+# superpowers injected ~1,500 tokens a session and a rule to load skills on a 1% chance
+retire_hooks = ["superpowers-plugin"]

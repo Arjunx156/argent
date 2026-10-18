@@ -1,6 +1,6 @@
 ---
 name: vibe
-description: The default voice for almost everything written for or as the user, including READMEs, posts, project pages, intros, release notes, bios and replies. Warm and kind, but high-energy, brilliant and cool, with confidence that comes from specifics, never hype. For formal letters, applications and official documents, use voice instead.
+description: Use when writing a piece others will read as the user: a README, post, project page, intro, bio or release notes. Warm and kind, high-energy and specific, never hype. Not for chat replies or code comments; formal letters and applications use voice.
 ---
 
 # Vibe

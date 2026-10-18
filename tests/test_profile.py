@@ -50,3 +50,13 @@ def test_rejects_bad_identity_fields(env: Env, field: str, value: str, message: 
 def test_expand_leaves_absolute_paths_alone(env: Env) -> None:
     assert env.expand("D:/Personal projects2.0").as_posix() == "D:/Personal projects2.0"
     assert env.expand("~") == env.home / ""
+
+
+def test_retired_hooks_default_to_none_and_must_be_text(env: Env) -> None:
+    assert load_profile(env).retire_hooks == ()
+    text = (env.repo / "profile.toml").read_text(encoding="utf-8")
+    write_profile(env, text + 'retire_hooks = ["superpowers-plugin"]\n')
+    assert load_profile(env).retire_hooks == ("superpowers-plugin",)
+    write_profile(env, text + "retire_hooks = [1]\n")
+    with pytest.raises(ProfileError, match="retire_hooks"):
+        load_profile(env)
