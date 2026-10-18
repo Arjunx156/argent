@@ -5,7 +5,7 @@ import sys
 from collections.abc import Callable
 
 from edith import __version__
-from edith.commands import deploy_cmd, doctor_cmd, shelve_cmd, tools_cmd
+from edith.commands import deploy_cmd, doctor_cmd, projects_cmd, shelve_cmd, tools_cmd
 from edith.commands.shelve_cmd import ShelfError
 from edith.paths import Env, RepoNotFoundError
 from edith.profile import ProfileError
@@ -32,7 +32,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"edith {__version__}")
     sub = parser.add_subparsers(title="commands", metavar="<command>")
-    for module in (doctor_cmd, deploy_cmd, tools_cmd, shelve_cmd):
+    for module in (doctor_cmd, deploy_cmd, projects_cmd, tools_cmd, shelve_cmd):
         module.register(sub)
     return parser
 

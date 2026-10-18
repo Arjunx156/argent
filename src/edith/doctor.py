@@ -16,6 +16,7 @@ from edith.kit import pretty
 from edith.merge import CHIME_MARK
 from edith.paths import Env
 from edith.profile import Profile, load_profile
+from edith.projects import survey
 from edith.render import branched_tools
 from edith.state import State
 from edith.tools import Detection, Manifest, detect, load_manifest, search_path
@@ -302,6 +303,33 @@ def check_python(ctx: Context) -> list[Finding]:
     return [Finding("pass", "python", f"`python` is {version.group(0)}")]
 
 
+def check_projects(ctx: Context) -> list[Finding]:
+    findings: list[Finding] = []
+    for root in ctx.profile.roots:
+        if not root.is_dir():
+            detail = f"{root.as_posix()} doesn't exist"
+            findings.append(
+                Finding("warn", "projects", detail, "fix projects.roots in profile.toml")
+            )
+    projects = survey(ctx.profile.roots)
+    needy = [p for p in projects if p.problems]
+    if not needy:
+        findings.append(Finding("pass", "projects", f"all {len(projects)} committed and pushed"))
+        return findings
+    kinds = {
+        "uncommitted changes": sum(p.changed > 0 for p in needy),
+        "unpushed commits": sum(p.ahead > 0 for p in needy),
+        "no remote": sum(p.is_repo and not p.remotes for p in needy),
+        "no git": sum(not p.is_repo for p in needy),
+    }
+    parts = ", ".join(
+        f"{n} with {k}" if k.startswith("un") else f"{n} {k}" for k, n in kinds.items() if n
+    )
+    detail = f"{len(needy)} of {len(projects)} need you: {parts}"
+    findings.append(Finding("info", "projects", detail, "edith projects --attention"))
+    return findings
+
+
 def check_snapshots(ctx: Context) -> list[Finding]:
     snaps = ctx.env.snapshots
     if not snaps.is_dir():
@@ -325,6 +353,7 @@ CHECKS: list[tuple[str, Check]] = [
     ("always-on rules", check_rules),
     ("skills", check_skills),
     ("hooks", check_hooks),
+    ("projects", check_projects),
     ("snapshots", check_snapshots),
 ]
 
